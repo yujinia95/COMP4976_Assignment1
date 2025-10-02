@@ -37,7 +37,9 @@ namespace ObituaryApp.Mvc.Controllers
                 var user = new ApplicationUser 
                 { 
                     UserName = model.Email, 
-                    Email = model.Email 
+                    Email = model.Email,
+                    Role = "User", // Set default role
+                    CreatedAt = DateTime.UtcNow
                 };
 
                 var result = await _userManager.CreateAsync(user, model.Password);
@@ -45,6 +47,13 @@ namespace ObituaryApp.Mvc.Controllers
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+                    
+                    // Automatically assign "User" role to new users
+                    await _userManager.AddToRoleAsync(user, "User");
+                    
+                    // Also set the custom Role property
+                    user.Role = "User";
+                    await _userManager.UpdateAsync(user);
                     
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return RedirectToAction("Index", "Home");

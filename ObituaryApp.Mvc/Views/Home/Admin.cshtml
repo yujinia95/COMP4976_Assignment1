@@ -1,0 +1,21 @@
+﻿@{
+    ViewData["Title"] = "Admin Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Admin Page</h1>
+    <p>This page is only accessible to authenticated users.</p>
+    <p class="lead">Welcome, @User.Identity!.Name!</p>
+    
+    <div class="alert alert-success" role="alert">
+        <h4 class="alert-heading">Authentication Successful!</h4>
+        <p>You have successfully accessed this protected resource.</p>
+        <hr>
+        <p class="mb-0">This demonstrates that the authentication system is working properly.</p>
+    </div>
+    
+    <div class="mt-3">
+        <a asp-action="Index" class="btn btn-primary">Back to Home</a>
+        <a asp-controller="Account" asp-action="Profile" class="btn btn-secondary">View Profile</a>
+    </div>
+</div>

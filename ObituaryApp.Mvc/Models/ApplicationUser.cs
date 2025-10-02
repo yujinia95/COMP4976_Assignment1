@@ -4,10 +4,10 @@ namespace ObituaryApp.Mvc.Models
 {
     public class ApplicationUser : IdentityUser
     {
-        // You can add additional properties here if needed
-        // For example:
-        // public string? FirstName { get; set; }
-        // public string? LastName { get; set; }
-        // public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        // Additional properties not in IdentityUser
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
+        public string? Role { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }
