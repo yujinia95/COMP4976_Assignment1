@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ObituaryApp.Mvc")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b2fdf47389e9a9816a97d5ed7fa8fa9367d26906")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1ca12cb04824bbe597253b70ea91395b35231275")]
 [assembly: System.Reflection.AssemblyProductAttribute("ObituaryApp.Mvc")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ObituaryApp.Mvc")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

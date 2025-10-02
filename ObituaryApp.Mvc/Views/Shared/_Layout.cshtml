@@ -33,11 +33,12 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Member">Member Page</a>
                             </li>
                         }
-
+                        @if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+                        {
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Admin">Admin Page</a>
                         </li>
-
+                        }
                     </ul>
                     <ul class="navbar-nav">
                         @if (SignInManager.IsSignedIn(User))
