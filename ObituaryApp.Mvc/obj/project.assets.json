@@ -3592,19 +3592,19 @@
     ]
   },
   "packageFolders": {
-    "/Users/yujinia/.nuget/packages/": {}
+    "/Users/dremax/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Mvc/ObituaryApp.Mvc.csproj",
+      "projectUniqueName": "/Users/dremax/Documents/CST/4_Term 4/COMP4976_DotNet/assignment1/COMP4976_Assignment1/ObituaryApp.Mvc/ObituaryApp.Mvc.csproj",
       "projectName": "ObituaryApp.Mvc",
-      "projectPath": "/Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Mvc/ObituaryApp.Mvc.csproj",
-      "packagesPath": "/Users/yujinia/.nuget/packages/",
-      "outputPath": "/Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Mvc/obj/",
+      "projectPath": "/Users/dremax/Documents/CST/4_Term 4/COMP4976_DotNet/assignment1/COMP4976_Assignment1/ObituaryApp.Mvc/ObituaryApp.Mvc.csproj",
+      "packagesPath": "/Users/dremax/.nuget/packages/",
+      "outputPath": "/Users/dremax/Documents/CST/4_Term 4/COMP4976_DotNet/assignment1/COMP4976_Assignment1/ObituaryApp.Mvc/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/yujinia/.nuget/NuGet/NuGet.Config"
+        "/Users/dremax/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
@@ -3628,7 +3628,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.300"
+      "SdkAnalysisLevel": "9.0.200"
     },
     "frameworks": {
       "net9.0": {
@@ -3672,7 +3672,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.304/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.202/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
