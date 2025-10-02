@@ -48,12 +48,12 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/dremax/Documents/CST/4_Term 4/COMP4976_DotNet/assignment1/COMP4976_Assignment1/ObituaryApp.Mvc/Views/Home/Privacy.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Qcml2YWN5LmNzaHRtbA==
+[/Users/dremax/Documents/CST/4_Term 4/COMP4976_DotNet/assignment1/COMP4976_Assignment1/ObituaryApp.Mvc/Views/Home/Member.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9NZW1iZXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/dremax/Documents/CST/4_Term 4/COMP4976_DotNet/assignment1/COMP4976_Assignment1/ObituaryApp.Mvc/Views/Home/Protected.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Qcm90ZWN0ZWQuY3NodG1s
+[/Users/dremax/Documents/CST/4_Term 4/COMP4976_DotNet/assignment1/COMP4976_Assignment1/ObituaryApp.Mvc/Views/Home/Privacy.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Qcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/dremax/Documents/CST/4_Term 4/COMP4976_DotNet/assignment1/COMP4976_Assignment1/ObituaryApp.Mvc/Views/Shared/Error.cshtml]

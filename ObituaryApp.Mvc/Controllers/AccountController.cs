@@ -38,6 +38,8 @@ namespace ObituaryApp.Mvc.Controllers
                 { 
                     UserName = model.Email, 
                     Email = model.Email,
+                    FirstName = model.FirstName, // Map from RegisterViewModel
+                    LastName = model.LastName,   // Map from RegisterViewModel
                     Role = "User", // Set default role
                     CreatedAt = DateTime.UtcNow
                 };
