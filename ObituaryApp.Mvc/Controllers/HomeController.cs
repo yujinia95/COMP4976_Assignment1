@@ -24,13 +24,13 @@ public class HomeController : Controller
         return View();
     }
 
-    [Authorize(Roles = "Creator,Admin")]
+    [Authorize(Roles = "Creator,Admin")] // Only users in the Creator or Admin roles can access this action
     public IActionResult Member()
     {
         return View();
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")] // Only users in the Admin role can access this action
     public IActionResult Admin()
     {
         return View();
