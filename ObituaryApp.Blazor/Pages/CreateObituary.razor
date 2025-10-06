@@ -1,0 +1,179 @@
+@page "/obituaries/create"
+@using ObituaryApp.Blazor.Models
+@using ObituaryApp.Blazor.Services
+@using System.ComponentModel.DataAnnotations
+@inject IObituaryService ObituaryService
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Create Obituary</PageTitle>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/obituaries">Obituaries</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Create New</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="bi bi-plus-circle"></i> Create New Obituary</h2>
+                </div>
+                <div class="card-body">
+                    <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="alert alert-danger" />
+
+                        <div class="mb-3">
+                            <label for="fullname" class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <InputText id="fullname" class="form-control" @bind-Value="model.FullName" placeholder="Enter full name" />
+                            <ValidationMessage For="@(() => model.FullName)" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="dateofbirth" class="form-label">Date of Birth</label>
+                                    <InputDate id="dateofbirth" class="form-control" @bind-Value="dateOfBirth" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="dateofdeath" class="form-label">Date of Death</label>
+                                    <InputDate id="dateofdeath" class="form-control" @bind-Value="dateOfDeath" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="biography" class="form-label">Biography</label>
+                            <InputTextArea id="biography" class="form-control" @bind-Value="model.Biography" 
+                                         rows="6" placeholder="Enter biography or tribute..." />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="photo" class="form-label">Photo</label>
+                            <InputFile id="photo" class="form-control" OnChange="@HandleFileSelected" accept="image/*" />
+                            @if (!string.IsNullOrEmpty(photoPreview))
+                            {
+                                <div class="mt-2">
+                                    <img src="@photoPreview" alt="Preview" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                                </div>
+                            }
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="/obituaries" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                                @if (isSubmitting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                }
+                                <i class="bi bi-check-circle"></i> Create Obituary
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private CreateObituaryDto model = new();
+    private DateTime? dateOfBirth;
+    private DateTime? dateOfDeath;
+    private string photoPreview = string.Empty;
+    private bool isSubmitting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        if (!isAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        isSubmitting = true;
+        
+        try
+        {
+            // Convert DateTime to DateOnly
+            model.DateOfBirth = dateOfBirth.HasValue ? DateOnly.FromDateTime(dateOfBirth.Value) : null;
+            model.DateOfDeath = dateOfDeath.HasValue ? DateOnly.FromDateTime(dateOfDeath.Value) : null;
+
+            var createdObituary = await ObituaryService.CreateObituaryAsync(model);
+            
+            await JSRuntime.InvokeVoidAsync("alert", "Obituary created successfully!");
+            Navigation.NavigateTo($"/obituaries/{createdObituary.Id}");
+        }
+        catch (UnauthorizedAccessException)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "You must be logged in to create obituaries. Please log in and try again.");
+            Navigation.NavigateTo("/login");
+        }
+        catch (HttpRequestException)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Unable to connect to the server. Please ensure the API is running and try again.");
+        }
+        catch (InvalidOperationException ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Failed to create obituary: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error creating obituary: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", "Failed to create obituary. Please try again.");
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var maxFileSize = 5 * 1024 * 1024; // 5MB
+            if (file.Size > maxFileSize)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "File size must be less than 5MB.");
+                return;
+            }
+
+            try
+            {
+                using var stream = file.OpenReadStream(maxFileSize);
+                using var memoryStream = new MemoryStream();
+                await stream.CopyToAsync(memoryStream);
+                
+                model.Photo = memoryStream.ToArray();
+                model.PhotoContentType = file.ContentType;
+
+                // Create preview
+                var base64String = Convert.ToBase64String(model.Photo);
+                photoPreview = $"data:{file.ContentType};base64,{base64String}";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error processing file: {ex.Message}");
+                await JSRuntime.InvokeVoidAsync("alert", "Error processing the selected file.");
+            }
+        }
+    }
+}

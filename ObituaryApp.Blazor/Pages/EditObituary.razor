@@ -1,0 +1,277 @@
+@page "/obituaries/{Id:int}/edit"
+@using ObituaryApp.Blazor.Models
+@using ObituaryApp.Blazor.Services
+@using System.ComponentModel.DataAnnotations
+@inject IObituaryService ObituaryService
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Edit Obituary</PageTitle>
+
+@if (loading)
+{
+    <div class="text-center mt-5">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else if (obituary == null)
+{
+    <div class="alert alert-danger mt-4">
+        <h4>Obituary Not Found</h4>
+        <p>The requested obituary could not be found.</p>
+        <a href="/obituaries" class="btn btn-primary">Back to Obituaries</a>
+    </div>
+}
+else if (!canEdit)
+{
+    <div class="alert alert-warning mt-4">
+        <h4>Access Denied</h4>
+        <p>You don't have permission to edit this obituary.</p>
+        <a href="/obituaries/@Id" class="btn btn-primary">Back to Obituary</a>
+    </div>
+}
+else
+{
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/obituaries">Obituaries</a></li>
+                        <li class="breadcrumb-item"><a href="/obituaries/@Id">@obituary.FullName</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Edit</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="bi bi-pencil"></i> Edit Obituary</h2>
+                    </div>
+                    <div class="card-body">
+                        <EditForm Model="@model" OnValidSubmit="@HandleValidSubmit">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary class="alert alert-danger" />
+
+                            <div class="mb-3">
+                                <label for="fullname" class="form-label">Full Name <span class="text-danger">*</span></label>
+                                <InputText id="fullname" class="form-control" @bind-Value="model.FullName" placeholder="Enter full name" />
+                                <ValidationMessage For="@(() => model.FullName)" />
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="dateofbirth" class="form-label">Date of Birth</label>
+                                        <InputDate id="dateofbirth" class="form-control" @bind-Value="dateOfBirth" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="dateofdeath" class="form-label">Date of Death</label>
+                                        <InputDate id="dateofdeath" class="form-control" @bind-Value="dateOfDeath" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="biography" class="form-label">Biography</label>
+                                <InputTextArea id="biography" class="form-control" @bind-Value="model.Biography" 
+                                             rows="6" placeholder="Enter biography or tribute..." />
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="photo" class="form-label">Photo</label>
+                                <InputFile id="photo" class="form-control" OnChange="@HandleFileSelected" accept="image/*" />
+                                
+                                @if (!string.IsNullOrEmpty(photoPreview))
+                                {
+                                    <div class="mt-2">
+                                        <label class="form-label">Current/New Photo:</label>
+                                        <img src="@photoPreview" alt="Preview" class="img-thumbnail d-block" style="max-width: 200px; max-height: 200px;" />
+                                        @if (hasNewPhoto)
+                                        {
+                                            <button type="button" class="btn btn-sm btn-outline-danger mt-2" @onclick="RemoveNewPhoto">
+                                                Remove New Photo
+                                            </button>
+                                        }
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <a href="/obituaries/@Id" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                                    @if (isSubmitting)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    }
+                                    <i class="bi bi-check-circle"></i> Update Obituary
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Obituary? obituary;
+    private CreateObituaryDto model = new();
+    private DateTime? dateOfBirth;
+    private DateTime? dateOfDeath;
+    private string photoPreview = string.Empty;
+    private bool loading = true;
+    private bool canEdit = false;
+    private bool isSubmitting = false;
+    private bool hasNewPhoto = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        if (!isAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        await LoadObituary();
+        await CheckEditPermissions();
+    }
+
+    private async Task LoadObituary()
+    {
+        loading = true;
+        try
+        {
+            obituary = await ObituaryService.GetObituaryByIdAsync(Id);
+            if (obituary != null)
+            {
+                // Populate the edit model
+                model.FullName = obituary.FullName;
+                model.Biography = obituary.Biography;
+                model.Photo = obituary.Photo;
+                model.PhotoContentType = obituary.PhotoContentType;
+
+                // Convert DateOnly to DateTime for InputDate
+                dateOfBirth = obituary.DateOfBirth?.ToDateTime(TimeOnly.MinValue);
+                dateOfDeath = obituary.DateOfDeath?.ToDateTime(TimeOnly.MinValue);
+
+                // Set photo preview
+                if (!string.IsNullOrEmpty(obituary.PhotoDataUrl))
+                {
+                    photoPreview = obituary.PhotoDataUrl;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading obituary: {ex.Message}");
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task CheckEditPermissions()
+    {
+        var isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        if (isAuthenticated)
+        {
+            var userRole = await AuthService.GetUserRoleAsync();
+            canEdit = userRole == "admin"; // For now, only admins can edit
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        isSubmitting = true;
+        
+        try
+        {
+            // Convert DateTime to DateOnly
+            model.DateOfBirth = dateOfBirth.HasValue ? DateOnly.FromDateTime(dateOfBirth.Value) : null;
+            model.DateOfDeath = dateOfDeath.HasValue ? DateOnly.FromDateTime(dateOfDeath.Value) : null;
+
+            var success = await ObituaryService.UpdateObituaryAsync(Id, model);
+            
+            if (success)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Obituary updated successfully!");
+                Navigation.NavigateTo($"/obituaries/{Id}");
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Failed to update obituary. Please try again.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating obituary: {ex.Message}");
+            await JSRuntime.InvokeVoidAsync("alert", "Failed to update obituary. Please try again.");
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var maxFileSize = 5 * 1024 * 1024; // 5MB
+            if (file.Size > maxFileSize)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "File size must be less than 5MB.");
+                return;
+            }
+
+            try
+            {
+                using var stream = file.OpenReadStream(maxFileSize);
+                using var memoryStream = new MemoryStream();
+                await stream.CopyToAsync(memoryStream);
+                
+                model.Photo = memoryStream.ToArray();
+                model.PhotoContentType = file.ContentType;
+                hasNewPhoto = true;
+
+                // Create preview
+                var base64String = Convert.ToBase64String(model.Photo);
+                photoPreview = $"data:{file.ContentType};base64,{base64String}";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error processing file: {ex.Message}");
+                await JSRuntime.InvokeVoidAsync("alert", "Error processing the selected file.");
+            }
+        }
+    }
+
+    private void RemoveNewPhoto()
+    {
+        hasNewPhoto = false;
+        // Restore original photo
+        if (obituary != null)
+        {
+            model.Photo = obituary.Photo;
+            model.PhotoContentType = obituary.PhotoContentType;
+            photoPreview = obituary.PhotoDataUrl ?? string.Empty;
+        }
+    }
+}

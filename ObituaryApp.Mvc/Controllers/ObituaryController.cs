@@ -19,6 +19,21 @@ public class ObituaryController : Controller
     }
 
 
+    //! Reading all obituaries. Need to work on it.
+    // public async Task<IActionResult> Index()
+    // {
+    //     var obituaries = await _context.Obituaries.ToListAsync();
+    //     return Ok(obituaries);
+    // }
+
+    // Reading all obituaries via HttpGet method
+    [HttpGet]
+    public async Task<IActionResult> Index()
+    {
+        var obituaries = await _context.Obituaries.ToListAsync();
+        return Ok(obituaries);
+    }
+
     // Reading one obituary by id
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Details([FromRoute] int id)
@@ -26,13 +41,6 @@ public class ObituaryController : Controller
         var obituary = await _context.Obituaries.FirstOrDefaultAsync(o => o.Id == id);
         return obituary is null ? NotFound() : Ok(obituary);
     }
-
-    //! Reading all obituaries. Need to work on it.
-    // public async Task<IActionResult> Index()
-    // {
-    //     var obituaries = await _context.Obituaries.ToListAsync();
-    //     return Ok(obituaries);
-    // }
 
     // Creating a new obituary
     [HttpPost]
