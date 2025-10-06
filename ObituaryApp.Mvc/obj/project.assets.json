@@ -3592,24 +3592,25 @@
     ]
   },
   "packageFolders": {
-    "/Users/dremax/.nuget/packages/": {}
+    "/Users/josephjahanshahi/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/dremax/Documents/CST/4_Term 4/COMP4976_DotNet/assignment1/COMP4976_Assignment1/ObituaryApp.Mvc/ObituaryApp.Mvc.csproj",
+      "projectUniqueName": "/Users/josephjahanshahi/Downloads/COMP4976_Assignment1/ObituaryApp.Mvc/ObituaryApp.Mvc.csproj",
       "projectName": "ObituaryApp.Mvc",
-      "projectPath": "/Users/dremax/Documents/CST/4_Term 4/COMP4976_DotNet/assignment1/COMP4976_Assignment1/ObituaryApp.Mvc/ObituaryApp.Mvc.csproj",
-      "packagesPath": "/Users/dremax/.nuget/packages/",
-      "outputPath": "/Users/dremax/Documents/CST/4_Term 4/COMP4976_DotNet/assignment1/COMP4976_Assignment1/ObituaryApp.Mvc/obj/",
+      "projectPath": "/Users/josephjahanshahi/Downloads/COMP4976_Assignment1/ObituaryApp.Mvc/ObituaryApp.Mvc.csproj",
+      "packagesPath": "/Users/josephjahanshahi/.nuget/packages/",
+      "outputPath": "/Users/josephjahanshahi/Downloads/COMP4976_Assignment1/ObituaryApp.Mvc/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/dremax/.nuget/NuGet/NuGet.Config"
+        "/Users/josephjahanshahi/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
       ],
       "sources": {
+        "/usr/local/share/dotnet/library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
