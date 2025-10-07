@@ -6,37 +6,54 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace ObituaryApp.Mvc.Controllers
 {
-    public class AccountController : Controller
+
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AccountController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<AccountController> _logger;
 
+        // JWT token service for creating tokens
+        private readonly IJwtTokenService _jwt;
+
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            ILogger<AccountController> logger)
+            ILogger<AccountController> logger,
+            IJwtTokenService jwt)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _jwt = jwt;
         }
 
-        [HttpGet]
-        public IActionResult Register()
-        {
-            return View();
-        }
+        //! Commented out IDK what this code do?
+        // [HttpGet]
+        // public IActionResult Register()
+        // {
+        //     return View();
+        // }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model)
-        {
+        /*
+            I tried to add JWT token here, but your logic is not letting me return json response.
+                - user, result, token are created inside the if and then used outside → out of scope (compiler error).
+        
+        
+        */
+        [AllowAnonymous]
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
+        {   
+
+            
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser 
-                { 
-                    UserName = model.Email, 
+                var user = new ApplicationUser
+                {       
+                    UserName = model.Email,
                     Email = model.Email,
                     FirstName = model.FirstName, // Map from RegisterViewModel
                     LastName = model.LastName,   // Map from RegisterViewModel
@@ -49,16 +66,17 @@ namespace ObituaryApp.Mvc.Controllers
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
-                    
                     // Automatically assign "User" role to new users
                     await _userManager.AddToRoleAsync(user, "User");
-                    
                     // Also set the custom Role property
                     user.Role = "User";
                     await _userManager.UpdateAsync(user);
-                    
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("Index", "Home");
+
+                    //! No cookies :)
+                    // await _signInManager.SignInAsync(user, isPersistent: false);
+
+                    // Generate JWT token
+                    var token = await _jwt.CreateAccessTokenAsync(user);
                 }
 
                 foreach (var error in result.Errors)
@@ -67,8 +85,25 @@ namespace ObituaryApp.Mvc.Controllers
                 }
             }
 
-            return View(model);
+            //! I need to send json response, but your logic won't let me do it.
+            return Created(string.Empty, new
+            {
+                Message = "User registered successfully",
+                user = new
+                {
+                    user.Id,
+                    user.Email,
+                    user.FirstName,
+                    user.LastName,
+                },
+                token
+            });
+
+            //! We don't need view since this is only for backend API
+            // return View(model);
         }
+
+
 
         [HttpGet]
         public IActionResult Login(string? returnUrl = null)
@@ -86,9 +121,9 @@ namespace ObituaryApp.Mvc.Controllers
             if (ModelState.IsValid)
             {
                 var result = await _signInManager.PasswordSignInAsync(
-                    model.Email, 
-                    model.Password, 
-                    model.RememberMe, 
+                    model.Email,
+                    model.Password,
+                    model.RememberMe,
                     lockoutOnFailure: false);
 
                 if (result.Succeeded)

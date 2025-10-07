@@ -7,8 +7,6 @@ namespace ObituaryApp.Mvc.Models;
 
 public class Obituary
 {
-    [Key]
-    [BindNever]
     public int Id { get; set; }
 
     public required string FullName { get; set; }
@@ -17,4 +15,5 @@ public class Obituary
     public string? Biography { get; set; }
     public byte[]? Photo { get; set; }
     public string? PhotoContentType { get; set; }
+    public required string CreatedByUserId { get; set; }
 }
