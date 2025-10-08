@@ -13,20 +13,17 @@ namespace ObituaryApp.Mvc.Controllers;
     All endpoints return JSON responses.
 */
 [ApiController]
-[Route("api/[controller]")]
-public class ObituaryController : ControllerBase
+[Route("api/obituaries")]
+public class ObituariesController : ControllerBase
 {
     private readonly ObituaryDbContext _dbContext;
     // For accessing to user/role info
-    private readonly UserManager<IdentityUser> _userManager;
-    // Fixed number of obituaries per page
-    private const int PageSize = 10;
+
 
     // Constructor
-    public ObituaryController(ObituaryDbContext dbContext, UserManager<IdentityUser> userManager)
+    public ObituariesController(ObituaryDbContext dbContext)
     {
-        _dbContext   = dbContext;
-        _userManager = userManager;
+        _dbContext = dbContext;
     }
 
 
@@ -36,12 +33,18 @@ public class ObituaryController : ControllerBase
     */
     [AllowAnonymous]
     [HttpGet]
-    public async Task<IActionResult> GetAllObituaries(int page = 1)
+    public async Task<IActionResult> GetAllObituaries(int page = 1, string? search = null)
     {
         const int PageSize = 10;
         if (page < 1) page = 1;
 
         var query = _dbContext.Obituaries.AsNoTracking();  // Just reading not editing
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(o => o.FullName.ToLower().Contains(search.ToLower()));
+        }
+
         var totalCount = await query.CountAsync();
         var items = await query
             .OrderByDescending(o => o.Id) // new obituaries first
@@ -127,7 +130,7 @@ public class ObituaryController : ControllerBase
             return NotFound(new { message = "Obituary not found. :/" });
         }
 
-        var userId  = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId  = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
         var isOwner = obituary.CreatedByUserId == userId;
         var isAdmin = User.IsInRole("Admin");
 
