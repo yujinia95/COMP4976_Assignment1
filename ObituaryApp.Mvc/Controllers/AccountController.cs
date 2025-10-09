@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace ObituaryApp.Mvc.Controllers
 {
-
+    //! I changed to ControllerBase to avoid views
     [ApiController]
     [Route("api/[controller]")]
     public class AccountController : ControllerBase
@@ -30,19 +30,13 @@ namespace ObituaryApp.Mvc.Controllers
             _jwt = jwt;
         }
 
-        //! Commented out IDK what this code do?
-        // [HttpGet]
-        // public IActionResult Register()
-        // {
-        //     return View();
-        // }
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
 
-        /*
-            I tried to add JWT token here, but your logic is not letting me return json response.
-                - user, result, token are created inside the if and then used outside → out of scope (compiler error).
-        
-        
-        */
+
         [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
@@ -75,8 +69,22 @@ namespace ObituaryApp.Mvc.Controllers
                     //! No cookies :)
                     // await _signInManager.SignInAsync(user, isPersistent: false);
 
+                    //! Code line from 73 to 88 is what Yujin generated.
                     // Generate JWT token
                     var token = await _jwt.CreateAccessTokenAsync(user);
+                    //! I need to send json response, but your logic won't let me do it.
+                    return Created(string.Empty, new
+                    {
+                        Message = "User registered successfully",
+                        user = new
+                        {
+                            user.Id,
+                            user.Email,
+                            user.FirstName,
+                            user.LastName,
+                        },
+                        token
+                    });
                 }
 
                 foreach (var error in result.Errors)
@@ -85,21 +93,7 @@ namespace ObituaryApp.Mvc.Controllers
                 }
             }
 
-            //! I need to send json response, but your logic won't let me do it.
-            return Created(string.Empty, new
-            {
-                Message = "User registered successfully",
-                user = new
-                {
-                    user.Id,
-                    user.Email,
-                    user.FirstName,
-                    user.LastName,
-                },
-                token
-            });
 
-            //! We don't need view since this is only for backend API
             // return View(model);
         }
 
