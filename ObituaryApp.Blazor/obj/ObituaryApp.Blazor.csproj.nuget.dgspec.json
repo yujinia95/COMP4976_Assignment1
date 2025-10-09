@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\te020\\Desktop\\4976 Assignment\\COMP4976_Assignment1\\ObituaryApp.Blazor\\ObituaryApp.Blazor.csproj": {}
+    "/Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Blazor/ObituaryApp.Blazor.csproj": {}
   },
   "projects": {
-    "C:\\Users\\te020\\Desktop\\4976 Assignment\\COMP4976_Assignment1\\ObituaryApp.Blazor\\ObituaryApp.Blazor.csproj": {
+    "/Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Blazor/ObituaryApp.Blazor.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\te020\\Desktop\\4976 Assignment\\COMP4976_Assignment1\\ObituaryApp.Blazor\\ObituaryApp.Blazor.csproj",
+        "projectUniqueName": "/Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Blazor/ObituaryApp.Blazor.csproj",
         "projectName": "ObituaryApp.Blazor",
-        "projectPath": "C:\\Users\\te020\\Desktop\\4976 Assignment\\COMP4976_Assignment1\\ObituaryApp.Blazor\\ObituaryApp.Blazor.csproj",
-        "packagesPath": "C:\\Users\\te020\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\te020\\Desktop\\4976 Assignment\\COMP4976_Assignment1\\ObituaryApp.Blazor\\obj\\",
+        "projectPath": "/Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Blazor/ObituaryApp.Blazor.csproj",
+        "packagesPath": "/Users/yujinia/.nuget/packages/",
+        "outputPath": "/Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Blazor/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\te020\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "/Users/yujinia/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
@@ -38,7 +38,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.200"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net9.0": {
@@ -60,13 +60,13 @@
             "Microsoft.NET.ILLink.Tasks": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[9.0.3, )",
+              "version": "[9.0.8, )",
               "autoReferenced": true
             },
             "Microsoft.NET.Sdk.WebAssembly.Pack": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[9.0.3, )",
+              "version": "[9.0.8, )",
               "autoReferenced": true
             }
           },
@@ -84,7 +84,7 @@
           "downloadDependencies": [
             {
               "name": "Microsoft.NETCore.App.Runtime.Mono.browser-wasm",
-              "version": "[9.0.3, 9.0.3]"
+              "version": "[9.0.8, 9.0.8]"
             }
           ],
           "frameworkReferences": {
@@ -92,7 +92,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.202/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.304/PortableRuntimeIdentifierGraph.json"
         }
       },
       "runtimes": {

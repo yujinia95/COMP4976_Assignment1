@@ -13,53 +13,53 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = browser
 build_property.RootNamespace = ObituaryApp.Blazor
 build_property.RootNamespace = ObituaryApp.Blazor
-build_property.ProjectDir = C:\Users\te020\Desktop\4976 Assignment\COMP4976_Assignment1\ObituaryApp.Blazor\
+build_property.ProjectDir = /Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Blazor/
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = false
 build_property.RazorLangVersion = 9.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = C:\Users\te020\Desktop\4976 Assignment\COMP4976_Assignment1\ObituaryApp.Blazor
+build_property.MSBuildProjectDirectory = /Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Blazor
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
-[C:/Users/te020/Desktop/4976 Assignment/COMP4976_Assignment1/ObituaryApp.Blazor/App.razor]
+[/Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Blazor/App.razor]
 build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/te020/Desktop/4976 Assignment/COMP4976_Assignment1/ObituaryApp.Blazor/Pages/CreateObituary.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ3JlYXRlT2JpdHVhcnkucmF6b3I=
+[/Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Blazor/Pages/CreateObituary.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQ3JlYXRlT2JpdHVhcnkucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/te020/Desktop/4976 Assignment/COMP4976_Assignment1/ObituaryApp.Blazor/Pages/EditObituary.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRWRpdE9iaXR1YXJ5LnJhem9y
+[/Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Blazor/Pages/EditObituary.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvRWRpdE9iaXR1YXJ5LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/te020/Desktop/4976 Assignment/COMP4976_Assignment1/ObituaryApp.Blazor/Pages/Home.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcSG9tZS5yYXpvcg==
+[/Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Blazor/Pages/Home.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvSG9tZS5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/te020/Desktop/4976 Assignment/COMP4976_Assignment1/ObituaryApp.Blazor/Pages/Login.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTG9naW4ucmF6b3I=
+[/Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Blazor/Pages/Login.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvTG9naW4ucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/te020/Desktop/4976 Assignment/COMP4976_Assignment1/ObituaryApp.Blazor/Pages/ObituaryDetails.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcT2JpdHVhcnlEZXRhaWxzLnJhem9y
+[/Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Blazor/Pages/ObituaryDetails.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvT2JpdHVhcnlEZXRhaWxzLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/te020/Desktop/4976 Assignment/COMP4976_Assignment1/ObituaryApp.Blazor/Pages/ObituaryList.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcT2JpdHVhcnlMaXN0LnJhem9y
+[/Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Blazor/Pages/ObituaryList.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvT2JpdHVhcnlMaXN0LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/te020/Desktop/4976 Assignment/COMP4976_Assignment1/ObituaryApp.Blazor/Pages/Register.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUmVnaXN0ZXIucmF6b3I=
+[/Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Blazor/Pages/Register.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvUmVnaXN0ZXIucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/te020/Desktop/4976 Assignment/COMP4976_Assignment1/ObituaryApp.Blazor/_Imports.razor]
+[/Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Blazor/_Imports.razor]
 build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/te020/Desktop/4976 Assignment/COMP4976_Assignment1/ObituaryApp.Blazor/Layout/MainLayout.razor]
-build_metadata.AdditionalFiles.TargetPath = TGF5b3V0XE1haW5MYXlvdXQucmF6b3I=
-build_metadata.AdditionalFiles.CssScope = b-iixco0h6ot
+[/Users/yujinia/Desktop/BCIT_Term_4/COMP_4976/Assignment/Assignment1/ObituaryApp.Blazor/Layout/MainLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = TGF5b3V0L01haW5MYXlvdXQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-0ul86ell68

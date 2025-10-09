@@ -66,8 +66,7 @@ namespace ObituaryApp.Mvc.Controllers
                     user.Role = "User";
                     await _userManager.UpdateAsync(user);
 
-                    //! No cookies :)
-                    // await _signInManager.SignInAsync(user, isPersistent: false);
+                    await _signInManager.SignInAsync(user, isPersistent: false);
 
                     //! Code line from 73 to 88 is what Yujin generated.
                     // Generate JWT token

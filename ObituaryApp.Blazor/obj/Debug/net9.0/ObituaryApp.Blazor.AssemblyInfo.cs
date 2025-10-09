@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ObituaryApp.Blazor")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+498dd085c5b7f4d767ebf5c923d7d131f10b5290")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ed2609c3ce34861044569fdac531fc48b05a87a6")]
 [assembly: System.Reflection.AssemblyProductAttribute("ObituaryApp.Blazor")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ObituaryApp.Blazor")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

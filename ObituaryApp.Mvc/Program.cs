@@ -14,36 +14,47 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Add Entity Framework
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=app.db"));
 
-// Add Identity services
-builder.Services.AddIdentityCore<ApplicationUser>(options => 
-{
-    // Password settings
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = true;
-    options.Password.RequiredLength = 8;
-    options.Password.RequiredUniqueChars = 1;
+//! This is ideal codes for database connection and identity management :)
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(connectionString));
+builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-    //! Commented out because we don't need this.
-    // // Lockout settings
-    // options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-    // options.Lockout.MaxFailedAccessAttempts = 5;
-    // options.Lockout.AllowedForNewUsers = true;
+builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>();
 
-    // // User settings
-    // options.User.AllowedUserNameCharacters =
-    //     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-    options.User.RequireUniqueEmail = true;
-})
-.AddRoles<IdentityRole>() //Enabling role based auth
-.AddEntityFrameworkStores<ApplicationDbContext>()
-.AddSignInManager() // helper functions for managing user sign-ins.
-.AddDefaultTokenProviders();
+
+//! Commented out because we don't need this. We have never learned using IdentityCore. Please reference the lecture script from Medhat. Thank you!
+// // Add Entity Framework
+// builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=app.db"));
+
+// // Add Identity services
+// builder.Services.AddIdentityCore<ApplicationUser>(options => 
+// {
+//     // Password settings
+//     options.Password.RequireDigit = true;
+//     options.Password.RequireLowercase = true;
+//     options.Password.RequireNonAlphanumeric = false;
+//     options.Password.RequireUppercase = true;
+//     options.Password.RequiredLength = 8;
+//     options.Password.RequiredUniqueChars = 1;
+
+//     // Lockout settings
+//     options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+//     options.Lockout.MaxFailedAccessAttempts = 5;
+//     options.Lockout.AllowedForNewUsers = true;
+
+//     // User settings
+//     options.User.AllowedUserNameCharacters =
+//         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+//     options.User.RequireUniqueEmail = true;
+// })
+// .AddRoles<IdentityRole>() //Enabling role based auth
+// .AddEntityFrameworkStores<ApplicationDbContext>()
+// .AddSignInManager() // helper functions for managing user sign-ins.
+// .AddDefaultTokenProviders();
 
 /*
     JWT Authentication setup
