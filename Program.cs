@@ -65,6 +65,13 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 
 builder.Services.AddControllersWithViews();
 
+// Add CORS
+builder.Services.AddCors(o => o.AddPolicy("AllowAllPolicy", builder => {
+    builder.AllowAnyOrigin()
+        .AllowAnyMethod()
+        .AllowAnyHeader();
+}));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -82,6 +89,10 @@ else
 }
 
 app.UseHttpsRedirection();
+
+// Use CORS - must be before UseRouting
+app.UseCors("AllowAllPolicy");
+
 app.UseRouting();
 
 app.UseAuthentication();
