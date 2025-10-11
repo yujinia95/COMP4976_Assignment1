@@ -1,152 +1,210 @@
-@model ObivtuaryMvcApi.Models.ObituaryEditViewModel
+@* This view allows users to edit an existing obituary. *@
 
+@model ObivtuaryMvcApi.Models.ObituaryEditViewModel
 @{
     ViewData["Title"] = "Edit Obituary";
 }
 
-<div class="row">
-    <div class="col-md-8">
-        <h2>@ViewData["Title"]</h2>
-        
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger" role="alert">
-                @TempData["Error"]
-            </div>
-        }
+@* Header *@
+<section class="memorial-hero--sub" aria-labelledby="page-title">
+  <div class="container">
+    <div class="hero-inner">
+      <h1 id="page-title" class="hero-title">Edit Obituary</h1>
+      <p class="hero-subtitle">Update details with care and accuracy.</p>
+    </div>
+  </div>
+</section>
 
-        <form asp-action="Edit" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
-            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
-            
+<div class="container my-4">
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      @* Server error handling *@
+      @if (TempData["Error"] != null)
+      {
+          <div class="alert alert-danger" role="alert">
+              @TempData["Error"]
+          </div>
+      }
+
+      <div class="card memorial-form-card">
+
+        <div class="card-body p-4">
+
+          @* Edit form *@
+          <form asp-action="Edit"
+                method="post"
+                enctype="multipart/form-data"
+                class="needs-validation memorial-form"
+                id="editForm"
+                novalidate>
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly"
+                 class="alert alert-danger d-none"
+                 role="alert"
+                 aria-live="polite"></div>
+
             <input asp-for="Id" type="hidden" />
             <input asp-for="HasExistingPhoto" type="hidden" />
-            
+
+
+            <!-- Full Name -->
             <div class="mb-3">
-                <label asp-for="FullName" class="form-label"></label>
-                <input asp-for="FullName" class="form-control" />
-                <span asp-validation-for="FullName" class="text-danger"></span>
+              <label asp-for="FullName" class="form-label">
+                Full Name <span class="req" aria-hidden="true">*</span>
+                <span class="visually-hidden">(required)</span>
+              </label>
+              <input asp-for="FullName" class="form-control" autocomplete="name" />
+              <span asp-validation-for="FullName" class="text-danger"></span>
             </div>
 
+            <!-- Dates -->
             <div class="row mb-3">
-                <div class="col-md-6">
-                    <label asp-for="DateOfBirth" class="form-label"></label>
-                    <input asp-for="DateOfBirth" class="form-control" type="date" />
-                    <span asp-validation-for="DateOfBirth" class="text-danger"></span>
-                </div>
-                <div class="col-md-6">
-                    <label asp-for="DateOfDeath" class="form-label"></label>
-                    <input asp-for="DateOfDeath" class="form-control" type="date" />
-                    <span asp-validation-for="DateOfDeath" class="text-danger"></span>
-                </div>
+
+              <div class="col-md-6">
+                <label asp-for="DateOfBirth" class="form-label">
+                  Date of Birth <span class="req" aria-hidden="true">*</span>
+                  <span class="visually-hidden">(required)</span>
+                </label>
+                <input asp-for="DateOfBirth" class="form-control" type="date" id="dobInput" />
+                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+              </div>
+
+              <div class="col-md-6">
+                <label asp-for="DateOfDeath" class="form-label">
+                  Date of Death <span class="req" aria-hidden="true">*</span>
+                  <span class="visually-hidden">(required)</span>
+                </label>
+                <input asp-for="DateOfDeath" class="form-control" type="date" id="dodInput" />
+                <span asp-validation-for="DateOfDeath" class="text-danger"></span>
+                <div class="form-text">Must be on/after Date of Birth. Neither date may be in the future.</div>
+              </div>
+
             </div>
 
+
+            <!-- Biography -->
             <div class="mb-3">
-                <label asp-for="Biography" class="form-label"></label>
-                <textarea asp-for="Biography" class="form-control" rows="6" placeholder="Write a meaningful biography..."></textarea>
+              <label asp-for="Biography" class="form-label">
+                Biography <span class="req" aria-hidden="true">*</span>
+                <span class="visually-hidden">(required)</span>
+              </label>
+              <textarea asp-for="Biography"
+                        class="form-control"
+                        rows="7"
+                        id="bioInput"
+                        maxlength="5000"
+                        placeholder="Write a meaningful biography… (up to 5,000 characters)"></textarea>
+              <div class="d-flex justify-content-between">
                 <span asp-validation-for="Biography" class="text-danger"></span>
-                <div class="form-text">Maximum 5000 characters.</div>
+                <small id="bioCounter" class="text-muted">0 / 5000</small>
+              </div>
             </div>
 
-            <div class="mb-3">
-                <label asp-for="PhotoFile" class="form-label"></label>
-                @if (Model.HasExistingPhoto)
-                {
-                    <div class="mb-2">
-                        <span class="badge bg-info">
-                            <i class="bi bi-image"></i> Current photo exists
-                        </span>
-                        <small class="text-muted d-block">Upload a new photo to replace the existing one, or leave empty to keep the current photo.</small>
-                    </div>
-                }
-                <input asp-for="PhotoFile" class="form-control" type="file" accept="image/*" />
-                <span asp-validation-for="PhotoFile" class="text-danger"></span>
-                <div class="form-text">Optional: Upload a new photo (JPEG, PNG, etc.)</div>
-            </div>
 
+            <!-- Photo -->
             <div class="mb-3">
-                <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-save"></i> Save Changes
+              <label asp-for="PhotoFile" class="form-label">Photo</label>
+
+              @if (Model.HasExistingPhoto)
+              {
+                @*! JOEY THIS IS THE ONE YOU GOTTA CONNECT TO THE BACKEND!!! *@
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="checkbox" id="removePhoto" name="RemovePhoto" value="true">
+                  <label class="form-check-label" for="removePhoto">
+                    Remove current photo
+                  </label>
+                </div>
+              }
+
+              @* Photo Dropzone *@
+              <div id="photoDrop" class="photo-dropzone" tabindex="0" aria-label="Drop a photo or use the upload button">
+                <div class="dz-inner">
+                  <i class="bi bi-image" aria-hidden="true"></i>
+                  <div>
+                    <strong>Drag & drop a new photo</strong><br/>
+                    or click <span class="link-like">Upload</span>
+                  </div>
+                </div>
+                <img id="photoPreview" class="photo-preview d-none" alt="Selected photo preview" />
+              </div>
+
+              <input asp-for="PhotoFile" id="photoInput" class="form-control d-none" type="file" accept="image/*" />
+              <div class="d-flex align-items-center gap-2 mt-2">
+                <button type="button" id="triggerUpload" class="btn btn-outline-secondary btn-sm">
+                  <i class="bi bi-upload"></i> Upload
                 </button>
-                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i> Back to Details
-                </a>
-                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
-                    <i class="bi bi-house"></i> Memorial Gallery
-                </a>
+                <button type="button" id="clearPhoto" class="btn btn-outline-danger btn-sm d-none">
+                  <i class="bi bi-x-circle"></i> Remove selection
+                </button>
+                <small id="photoInfo" class="text-muted ms-auto"></small>
+              </div>
+
+              <span asp-validation-for="PhotoFile" class="text-danger"></span>
+              <div class="form-text">JPEG/PNG recommended, up to 5&nbsp;MB. Square or portrait crops look best.</div>
             </div>
-        </form>
+
+
+            <div class="d-flex flex-wrap gap-2 mt-4">
+              <!-- Save button -->
+              <button type="submit" class="btn btn-primary" id="saveBtn">
+                <span class="default"><i class="bi bi-save"></i> Save Changes</span>
+                <span class="busy d-none"><i class="bi bi-hourglass-split"></i> Saving…</span>
+              </button>
+
+              <!-- Cancel and Back buttons -->
+              <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Details
+              </a>
+
+              <!-- Back to Gallery button -->
+              <a asp-controller="ObituariesMvc" asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-house"></i> Memorial Gallery
+              </a>
+            </div>
+          </form>
+
+        </div>
+      </div>
     </div>
 
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="bi bi-info-circle"></i> Edit Guidelines</h5>
-            </div>
-            <div class="card-body">
-                <ul class="list-unstyled">
-                    <li><i class="bi bi-check-circle text-success"></i> All fields marked with * are required</li>
-                    <li><i class="bi bi-check-circle text-success"></i> Date of death must be after date of birth</li>
-                    <li><i class="bi bi-check-circle text-success"></i> Neither date can be in the future</li>
-                    <li><i class="bi bi-check-circle text-success"></i> Biography should be meaningful and respectful</li>
-                    <li><i class="bi bi-check-circle text-success"></i> Photo upload is optional - leave empty to keep existing</li>
-                </ul>
-                
-                @if (User.IsInRole("Admin"))
-                {
-                    <div class="alert alert-info mt-3">
-                        <i class="bi bi-shield-check"></i> <strong>Admin Access:</strong> You can edit any obituary.
-                    </div>
-                }
-                else
-                {
-                    <div class="alert alert-warning mt-3">
-                        <i class="bi bi-person-check"></i> <strong>User Access:</strong> You can only edit obituaries you created.
-                    </div>
-                }
-            </div>
+    <!-- Update guidelines -->
+    <div class="col-lg-4">
+      <aside class="card memorial-side">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="bi bi-info-circle" aria-hidden="true"></i> Edit Guidelines</h5>
         </div>
+        <div class="card-body">
+          <ul class="list-unstyled v-list">
+            <li><i class="bi bi-check-circle text-success"></i> Fields marked <span class="req">*</span> are required.</li>
+            <li><i class="bi bi-check-circle text-success"></i> Date of death must be on/after date of birth.</li>
+            <li><i class="bi bi-check-circle text-success"></i> Dates cannot be in the future.</li>
+            <li><i class="bi bi-check-circle text-success"></i> Biography should be respectful and specific.</li>
+            <li><i class="bi bi-check-circle text-success"></i> To keep the current photo, don’t upload a new one.</li>
+          </ul>
+          
+          @* Depending on user role shows if that user can successfuly edit *@
+          @if (User.IsInRole("Admin"))
+          {
+            <div class="alert alert-info mt-3">
+              <i class="bi bi-shield-check"></i> <strong>Admin:</strong> You can edit any obituary.
+            </div>
+          }
+          else
+          {
+            <div class="alert alert-warning mt-3">
+              <i class="bi bi-person-check"></i> <strong>User:</strong> You may edit only obituaries you created.
+            </div>
+          }
+        </div>
+      </aside>
     </div>
+  </div>
 </div>
 
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    
-    <script>
-        // Bootstrap validation
-        (function() {
-            'use strict';
-            window.addEventListener('load', function() {
-                var forms = document.getElementsByClassName('needs-validation');
-                var validation = Array.prototype.filter.call(forms, function(form) {
-                    form.addEventListener('submit', function(event) {
-                        if (form.checkValidity() === false) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-                        form.classList.add('was-validated');
-                    }, false);
-                });
-            }, false);
-        })();
-
-        // Preview uploaded image
-        document.querySelector('input[type="file"]').addEventListener('change', function(e) {
-            if (e.target.files && e.target.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    // Create preview if it doesn't exist
-                    let preview = document.getElementById('photo-preview');
-                    if (!preview) {
-                        preview = document.createElement('img');
-                        preview.id = 'photo-preview';
-                        preview.className = 'mt-2 img-thumbnail';
-                        preview.style.maxHeight = '200px';
-                        e.target.parentNode.appendChild(preview);
-                    }
-                    preview.src = e.target.result;
-                };
-                reader.readAsDataURL(e.target.files[0]);
-            }
-        });
-    </script>
+@section Scripts{
+  @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+  <script src="~/js/memorial-edit.js" asp-append-version="true"></script>
 }
+<link rel="stylesheet" href="~/css/memorial-edit.css" asp-append-version="true" />

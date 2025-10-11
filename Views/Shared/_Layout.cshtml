@@ -1,66 +1,99 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - ObivtuaryMvcApi</title>
+    <title>@ViewData["Title"] - ObituaryApp</title>
+
     <script type="importmap"></script>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ObivtuaryMvcApi.styles.css" asp-append-version="true" />
+
+    @RenderSection("Styles", required: false)
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">ObivtuaryMvcApi</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+
+<body class="memorial-body">
+    <header class="memorial-header" aria-label="Site header">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom memorial-navbar">
+            <div class="container">
+                <a class="navbar-brand d-flex align-items-center gap-2" asp-area="" asp-controller="Home"
+                    asp-action="Index">
+                    <i class="bi bi-flower1 text-accent fs-4" aria-hidden="true"></i>
+                    <span class="fw-semibold">ObituaryApp</span>
+                </a>
+                
+                <!-- burger menu -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                    aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+
+                <div id="mainNav" class="collapse navbar-collapse">
+                    <ul class="navbar-nav me-auto">
+
+                        <!-- Home / Gallery -->
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-images" aria-hidden="true"></i> Memorial Gallery
+                            </a>
                         </li>
+
+                        <!-- Swagger API documentation -->
                         <li class="nav-item">
-                            <a class="nav-link text-dark" href="/swagger">Swagger</a>
+                            <a class="nav-link" href="/swagger">
+                                <i class="bi bi-braces-asterisk" aria-hidden="true"></i> Swagger
+                            </a>
                         </li>
+                    </ul>
+                    
+
+                     <!-- Create obituary button for logged-in users -->
+                    <div class="d-flex align-items-center gap-2">
                         @if (User.IsInRole("Admin") || User.IsInRole("User"))
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="ObituariesMvc" asp-action="Create">
-                                    <i class="bi bi-plus-circle"></i> Create Obituary
-                                </a>
-                            </li>
+                            <a class="btn btn-accent btn-sm d-flex align-items-center gap-1" asp-area=""
+                                asp-controller="ObituariesMvc" asp-action="Create">
+                                <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                                <span>Create Obituary</span>
+                            </a>
                         }
+                        <partial name="_LoginPartial" />
+                    </div>
 
-                        
-                    </ul>
-                    <partial name="_LoginPartial" />
                 </div>
             </div>
         </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - ObivtuaryMvcApi
-            @if (User.Identity != null && User.Identity.IsAuthenticated)
-            {
-                <text> - <a href="/swagger">Swagger</a></text>
-            }
+    </header>
+
+    @* Main content area *@
+    <main role="main" class="memorial-main">
+        <div class="container py-4">
+            @RenderBody()
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="memorial-footer border-top">
+        <div class="container d-flex flex-wrap justify-content-between align-items-center py-3 small text-muted">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-flower1 text-accent" aria-hidden="true"></i>
+                <span>ObituaryApp · A quiet place to remember</span>
+            </div>
+            <div>
+                <span>Yujin Jeong (A01310724), Joey Jahanshahi (A01384174), Andre Hindarmara</span>
+            </div>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
+
 </html>
