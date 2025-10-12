@@ -57,6 +57,9 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
     options.Password.RequireUppercase = true; // at least one uppercase letter
     options.Password.RequiredLength = 8; // minimum length
     options.Password.RequiredUniqueChars = 1; // at least one unique character
+    
+    // Sign-in settings - require confirmed account for login
+    options.SignIn.RequireConfirmedAccount = false; // Set to false to allow immediate login after registration
 })
 .AddEntityFrameworkStores<ApplicationDbContext>() // Store users and roles in the database
 .AddRoles<IdentityRole>() // Add role management RoleManager<IdentityRole>, UserManager<IdentityUser>

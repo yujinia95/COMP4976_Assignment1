@@ -58,5 +58,17 @@ public class IdentitySeedData {
                 await userManager.AddToRoleAsync(user, userRole);
             }
         }
+
+        // Automatically assign "User" role to any existing users who don't have a role
+        var allUsers = userManager.Users.ToList();
+        foreach (var user in allUsers)
+        {
+            var roles = await userManager.GetRolesAsync(user);
+            if (roles.Count == 0)
+            {
+                // User has no role, assign "User" role by default
+                await userManager.AddToRoleAsync(user, userRole);
+            }
+        }
     }
 }
