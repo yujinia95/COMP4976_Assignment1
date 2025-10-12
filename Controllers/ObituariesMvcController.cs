@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace ObivtuaryMvcApi.Controllers;
 
-[Authorize(Roles = "Admin,User")] // Only Admin or User can access these actions
+[Authorize] // Any authenticated user can access these actions (Admins still have elevated rights)
 public class ObituariesMvcController : Controller
 {
     private readonly ApplicationDbContext _context;
@@ -45,6 +45,7 @@ public class ObituariesMvcController : Controller
     }
 
     // GET: ObituariesMvc/Create
+    [AllowAnonymous]
     public IActionResult Create()
     {
         return View();
@@ -53,16 +54,19 @@ public class ObituariesMvcController : Controller
     // POST: ObituariesMvc/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [AllowAnonymous]
     public async Task<IActionResult> Create(ObituaryCreateViewModel model)
     {
         if (ModelState.IsValid)
         {
             // Get the current user's ID
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            // If a user isn't authenticated, allow creation and store empty string
+            // for CreatedByUserId so we don't require a DB migration.
             if (string.IsNullOrEmpty(userId))
             {
-                TempData["Error"] = "Unable to identify current user.";
-                return View(model);
+                userId = string.Empty;
             }
 
             var obituary = new Obituary
@@ -88,7 +92,7 @@ public class ObituariesMvcController : Controller
 
             _context.Add(obituary);
             await _context.SaveChangesAsync();
-            
+
             TempData["Success"] = "Obituary created successfully!";
             return RedirectToAction("Index", "Home");
         }
@@ -112,8 +116,9 @@ public class ObituariesMvcController : Controller
         // Check if the current user can edit this obituary
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var isAdmin = User.IsInRole("Admin");
-        
-        if (obituary.CreatedByUserId != userId && !isAdmin)
+
+        // If CreatedByUserId is null/empty, only Admins may modify.
+        if ((string.IsNullOrEmpty(obituary.CreatedByUserId) || obituary.CreatedByUserId != userId) && !isAdmin)
         {
             TempData["Error"] = "You can only edit obituaries you created, or you must be an Admin.";
             return RedirectToAction("Index", "Home");
@@ -155,8 +160,9 @@ public class ObituariesMvcController : Controller
                 // Check if the current user can edit this obituary
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 var isAdmin = User.IsInRole("Admin");
-                
-                if (obituary.CreatedByUserId != userId && !isAdmin)
+
+                // If CreatedByUserId is null/empty, only Admins may modify.
+                if ((string.IsNullOrEmpty(obituary.CreatedByUserId) || obituary.CreatedByUserId != userId) && !isAdmin)
                 {
                     TempData["Error"] = "You can only edit obituaries you created, or you must be an Admin.";
                     return RedirectToAction("Index", "Home");
@@ -169,7 +175,7 @@ public class ObituariesMvcController : Controller
                 obituary.Biography = model.Biography;
                 obituary.UpdatedAt = DateTime.UtcNow;
 
-                // Handle photo update
+                // Handle photo update / removal
                 if (model.PhotoFile != null && model.PhotoFile.Length > 0)
                 {
                     using (var memoryStream = new MemoryStream())
@@ -178,10 +184,15 @@ public class ObituariesMvcController : Controller
                         obituary.Photo = memoryStream.ToArray();
                     }
                 }
+                else if (model.RemovePhoto)
+                {
+                    // Clear the stored photo if user requested removal and didn't upload a new one
+                    obituary.Photo = null;
+                }
 
                 _context.Update(obituary);
                 await _context.SaveChangesAsync();
-                
+
                 TempData["Success"] = "Obituary updated successfully!";
             }
             catch (DbUpdateConcurrencyException)
@@ -218,7 +229,7 @@ public class ObituariesMvcController : Controller
         // Check if the current user can delete this obituary
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var isAdmin = User.IsInRole("Admin");
-        var canDelete = obituary.CreatedByUserId == userId || isAdmin;
+    var canDelete = (!string.IsNullOrEmpty(obituary.CreatedByUserId) && obituary.CreatedByUserId == userId) || isAdmin;
 
         var viewModel = new ObituaryDeleteViewModel
         {
@@ -243,8 +254,9 @@ public class ObituariesMvcController : Controller
         // Check if the current user can delete this obituary
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var isAdmin = User.IsInRole("Admin");
-        
-        if (obituary.CreatedByUserId != userId && !isAdmin)
+
+        // If CreatedByUserId is null/empty, only Admins may delete.
+        if ((string.IsNullOrEmpty(obituary.CreatedByUserId) || obituary.CreatedByUserId != userId) && !isAdmin)
         {
             TempData["Error"] = "You can only delete obituaries you created, or you must be an Admin.";
             return RedirectToAction("Index", "Home");
@@ -252,7 +264,7 @@ public class ObituariesMvcController : Controller
 
         _context.Obituaries.Remove(obituary);
         await _context.SaveChangesAsync();
-        
+
         TempData["Success"] = "Obituary deleted successfully!";
         return RedirectToAction("Index", "Home");
     }

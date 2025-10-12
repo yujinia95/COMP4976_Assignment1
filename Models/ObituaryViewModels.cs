@@ -27,6 +27,10 @@ public class ObituaryCreateViewModel : IValidatableObject
     [Display(Name = "Photo")]
     public IFormFile? PhotoFile { get; set; }
 
+    // When true the existing photo should be removed from the sqlite storage DB
+    [Display(Name = "Remove current photo")]
+    public bool RemovePhoto { get; set; }
+
     // Custom validation to ensure DateOfDeath is after or equal to DateOfBirth
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
@@ -75,6 +79,10 @@ public class ObituaryEditViewModel : IValidatableObject
     public IFormFile? PhotoFile { get; set; }
 
     public bool HasExistingPhoto { get; set; }
+
+    // This shows the user that they have the option to remove current photo
+    [Display(Name = "Remove current photo")]
+    public bool RemovePhoto { get; set; }
 
     // Custom validation to ensure DateOfDeath is after or equal to DateOfBirth
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

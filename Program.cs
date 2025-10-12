@@ -208,7 +208,8 @@ app.MapPut("/api/obituaries/{id:int}", async (int id, ObituaryUpdateDto obituary
 
     var isAdmin = user.IsInRole("Admin");
     
-    if (obituary.CreatedByUserId != userId && !isAdmin)
+    // If CreatedByUserId is null/empty, only Admins may update.
+    if ((string.IsNullOrEmpty(obituary.CreatedByUserId) || obituary.CreatedByUserId != userId) && !isAdmin)
     {
         return Results.Problem("You can only update obituaries you created, or you must be an Admin.", statusCode: 403);
     }
@@ -273,7 +274,8 @@ app.MapDelete("/api/obituaries/{id:int}", async (int id, ApplicationDbContext co
 
     var isAdmin = user.IsInRole("Admin");
     
-    if (obituary.CreatedByUserId != userId && !isAdmin)
+    // If CreatedByUserId is null/empty, only Admins may delete.
+    if ((string.IsNullOrEmpty(obituary.CreatedByUserId) || obituary.CreatedByUserId != userId) && !isAdmin)
     {
         return Results.Problem("You can only delete obituaries you created, or you must be an Admin.", statusCode: 403);
     }

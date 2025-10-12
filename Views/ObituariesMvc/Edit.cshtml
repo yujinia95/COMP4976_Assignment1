@@ -109,9 +109,9 @@
 
               @if (Model.HasExistingPhoto)
               {
-                @*! JOEY THIS IS THE ONE YOU GOTTA CONNECT TO THE BACKEND!!! *@
+                // Button that removes the current photo from the obituary. 
                 <div class="form-check mb-2">
-                  <input class="form-check-input" type="checkbox" id="removePhoto" name="RemovePhoto" value="true">
+                  <input asp-for="RemovePhoto" class="form-check-input" type="checkbox" id="removePhoto" />
                   <label class="form-check-label" for="removePhoto">
                     Remove current photo
                   </label>

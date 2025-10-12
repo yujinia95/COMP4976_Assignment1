@@ -144,6 +144,20 @@
       markDirty();
     }
 
+    // When user checks "remove existing photo", clear any selected file and show info
+    if (removeExisting) {
+      removeExisting.addEventListener('change', function () {
+        if (removeExisting.checked) {
+          resetSelection();
+          if (info) info.textContent = 'Current photo will be removed when you save.';
+        }
+        else {
+          if (info) info.textContent = '';
+        }
+        markDirty();
+      });
+    }
+
     if (trigger) trigger.addEventListener("click", () => input.click());
     if (clearBtn) clearBtn.addEventListener("click", () => resetSelection());
     input.addEventListener("change", (e) => handleFiles(e.target.files));
@@ -179,28 +193,28 @@
     Array.prototype.forEach.call(forms, function (form) {
       form.addEventListener("submit", function (event) {
 
-          // busy state
-          const btn = form.querySelector("#saveBtn");
-          if (btn) {
-            btn.querySelector(".default")?.classList.add("d-none");
-            btn.querySelector(".busy")?.classList.remove("d-none");
-          }
-          if (form.checkValidity() === false) {
-            event.preventDefault();
-            event.stopPropagation();
-            const summary =
-              form.querySelector('[asp-validation-summary="ModelOnly"]') ||
-              form.querySelector('.alert[role="alert"]');
-            if (summary) summary.classList.remove("d-none");
+        // busy state
+        const btn = form.querySelector("#saveBtn");
+        if (btn) {
+          btn.querySelector(".default")?.classList.add("d-none");
+          btn.querySelector(".busy")?.classList.remove("d-none");
+        }
+        if (form.checkValidity() === false) {
+          event.preventDefault();
+          event.stopPropagation();
+          const summary =
+            form.querySelector('[asp-validation-summary="ModelOnly"]') ||
+            form.querySelector('.alert[role="alert"]');
+          if (summary) summary.classList.remove("d-none");
 
-            // reset busy state
-            if (btn) {
-              btn.querySelector(".default")?.classList.remove("d-none");
-              btn.querySelector(".busy")?.classList.add("d-none");
-            }
+          // reset busy state
+          if (btn) {
+            btn.querySelector(".default")?.classList.remove("d-none");
+            btn.querySelector(".busy")?.classList.add("d-none");
           }
-          form.classList.add("was-validated");
-        },
+        }
+        form.classList.add("was-validated");
+      },
         false
       );
     });
