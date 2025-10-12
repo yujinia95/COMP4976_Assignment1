@@ -11,8 +11,6 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/ObivtuaryMvcApi.styles.css" asp-append-version="true" />
-
     @RenderSection("Styles", required: false)
 </head>
 
@@ -43,11 +41,14 @@
                         </li>
 
                         <!-- Swagger API documentation -->
-                        <li class="nav-item">
-                            <a class="nav-link" href="/swagger">
-                                <i class="bi bi-braces-asterisk" aria-hidden="true"></i> Swagger
-                            </a>
-                        </li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" href="/swagger">
+                                    <i class="bi bi-braces-asterisk" aria-hidden="true"></i> Swagger
+                                </a>
+                            </li>
+                        }
                     </ul>
                     
 
@@ -85,14 +86,13 @@
                 <span>ObituaryApp · A quiet place to remember</span>
             </div>
             <div>
-                <span>Yujin Jeong (A01310724), Joey Jahanshahi (A01384174), Andre Hindarmara</span>
+                <span>Yujin Jeong (A01310724), Joey Jahanshahi (A01384174), Andre Hindarmara (A01075140)</span>
             </div>
         </div>
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using ObivtuaryMvcApi.Data;
 using ObivtuaryMvcApi.Models;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -75,18 +76,18 @@ builder.Services.AddCors(o => o.AddPolicy("AllowAllPolicy", builder => {
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseMigrationsEndPoint();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-else
-{
+// if (app.Environment.IsDevelopment())
+// {
+//     app.UseMigrationsEndPoint();
+//     app.UseSwagger();
+//     app.UseSwaggerUI();
+// }
+// else
+// {
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
-}
+// }
 
 app.UseHttpsRedirection();
 
@@ -98,6 +99,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Static assets mapping (kept in place)
 app.MapStaticAssets();
 // Default route
 app.MapControllerRoute(
@@ -124,6 +126,39 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.MapIdentityApi<IdentityUser>();
+
+// This block of code makes Swagger available in deployeed environments
+// Enable Swagger in non-development via configuration and protect it so only Admins can access
+var enableSwagger = builder.Configuration.GetValue<bool>("EnableSwagger", false);
+if (app.Environment.IsDevelopment() || enableSwagger)
+{
+    // Protect the /swagger endpoints so anonymous or non-admin users cannot view them in production
+    app.Use(async (context, next) =>
+    {
+        if (context.Request.Path.StartsWithSegments("/swagger", StringComparison.OrdinalIgnoreCase))
+        {
+            // If user is not authenticated, this will redirect to login if using cookie auth
+            if (!(context.User?.Identity?.IsAuthenticated ?? false))
+            {
+                // Redirect to the Identity login page with return url so the user can authenticate
+                var returnUrl = Uri.EscapeDataString(context.Request.Path + context.Request.QueryString);
+                context.Response.Redirect($"/Identity/Account/Login?ReturnUrl={returnUrl}");
+                return;
+            }
+
+            // If authenticated but not in Admin role, forbid
+            if (!context.User.IsInRole("Admin"))
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                return;
+            }
+        }
+        await next();
+    });
+
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 // Minimal API endpoints for Obituaries
 // GET /api/obituaries - Get all obituaries
@@ -171,7 +206,7 @@ app.MapPost("/api/obituaries", async (ObituaryCreateDto obituaryDto, Application
         return Results.BadRequest("Date of Death cannot be in the future.");
     }
 
-    var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
 
     var obituary = new Obituary
     {
