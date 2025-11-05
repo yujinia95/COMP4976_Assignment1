@@ -1,0 +1,333 @@
+﻿@*
+    This is the main page showing obituary gallery with search and pagination.
+    Users can search by name, and if logged in, create new obituaries.
+*@
+
+@model IEnumerable<ObivtuaryMvcApi.Models.Obituary>
+@{
+    ViewData["Title"] = "Memorial Gallery";
+    var isSearchActive  = (bool?)ViewBag.IsSearchActive == true;
+    string searchTerm        = ViewBag.SearchTerm as string ?? "";
+    int totalPages           = (int?)ViewBag.TotalPages ?? 1;
+    int currentPage          = (int?)ViewBag.CurrentPage ?? 1;
+}
+
+<!-- Header Section -->
+<section class="memorial-hero" aria-labelledby="page-title">
+    <div class="container">
+        <div class="hero-inner">
+            <i class="bi bi-flower1"></i>
+            <h1 id="page-title" class="hero-title">Memorial Gallery</h1>
+            <p class="hero-subtitle">A quiet place to remember and celebrate lives well lived.</p>
+        </div>
+    </div>
+</section>
+
+<div class="container my-4">
+
+    <!-- Search -->
+    <form asp-action="Index" method="get" class="memorial-search" role="search" aria-label="Search memorials">
+        <div class="input-group input-group-lg memorial-search__group">
+            <span class="input-group-text memorial-search__icon" aria-hidden="true">
+                <i class="bi bi-search"></i>
+            </span>
+
+            <input type="text" id="searchInput" name="searchTerm" class="form-control memorial-search__input"
+                value="@searchTerm" placeholder="Search by name..." autocomplete="off" aria-label="Search by name">
+
+            @if (isSearchActive)
+            {
+                <button type="button" id="clearSearch" class="btn btn-outline-secondary memorial-search__clear"
+                    title="Clear search" aria-label="Clear search">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            }
+
+            <button type="submit" class="btn btn-primary memorial-search__submit" aria-label="Search">
+                <span class="default"><i class="bi bi-search"></i> Search</span>
+                <span class="busy d-none"><i class="bi bi-hourglass-split"></i> Searching…</span>
+            </button>
+        </div>
+
+        @* Search result *@
+        @if (isSearchActive)
+        {
+            <div class="text-center mt-2" aria-live="polite">
+                @if ((int?)ViewBag.SearchResultCount > 0)
+                {
+                    <small class="text-success">
+                        <i class="bi bi-check-circle"></i>
+                        Found @ViewBag.SearchResultCount memorial(s) for <strong>“@searchTerm”</strong>.
+                    </small>
+                }
+                else
+                {
+                    <small class="text-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        No memorials found for <strong>“@searchTerm”</strong>.
+                    </small>
+                }
+            </div>
+        }
+    </form>
+
+    <!-- Create Memorial Button (visible to authenticated users) -->
+    @if (User.Identity?.IsAuthenticated ?? false)
+    {
+        <div class="text-center my-4">
+            <a asp-controller="ObituariesMvc" asp-action="Create" class="btn btn-primary btn-lg">
+                <i class="bi bi-plus-circle"></i> Create Memorial
+            </a>
+        </div>
+    }
+    else
+    {
+        <div class="text-center my-4">
+            <p class="text-muted">
+                <i class="bi bi-info-circle"></i> 
+                <a asp-area="Identity" asp-page="/Account/Login" class="text-decoration-none">Sign in</a> or 
+                <a asp-area="Identity" asp-page="/Account/Register" class="text-decoration-none">register</a> to create a memorial.
+            </p>
+        </div>
+    }
+
+    <!-- For empty obituary -->
+    @if (!Model.Any() && !isSearchActive)
+    {
+        <div class="empty-state text-center">
+            <i class="bi bi-journal-heart empty-state__icon"></i>
+            <h2 class="empty-state__title">No memorials yet</h2>
+            <p class="empty-state__text">This gallery is ready for its first tribute.</p>
+
+            <!-- If user is in Admin or User role, show Create button -->
+            @if (User.IsInRole("Admin") || User.IsInRole("User"))
+            {
+                <a asp-controller="ObituariesMvc" asp-action="Create" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Create First Memorial
+                </a>
+            }
+        </div>
+    }
+    
+    @* Search results *@
+    else if (!Model.Any() && isSearchActive)
+    {
+        <div class="empty-state text-center">
+            <i class="bi bi-search-heart empty-state__icon"></i>
+            <h2 class="empty-state__title">No results</h2>
+            <p class="empty-state__text">No memorials match “<strong>@searchTerm</strong>”.</p>
+            <div class="d-flex justify-content-center gap-2">
+                <button type="button" class="btn btn-outline-primary" onclick="clearSearchAndReload()">
+                    <i class="bi bi-arrow-clockwise"></i> Clear Search
+                </button>
+                <!-- If user is in Admin or User role, show Create button -->
+                @if (User.IsInRole("Admin") || User.IsInRole("User"))
+                {
+                    <a asp-controller="ObituariesMvc" asp-action="Create" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Create Memorial
+                    </a>
+                }
+            </div>
+        </div>
+    }
+    @* For this block if there is obituary, then obituary grid should be shown *@
+    else
+    {
+        <!-- Obituary Grid -->
+        <div class="row g-4 memorial-grid">
+            @foreach (var obituary in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <article class="card memorial-card h-100" role="article" aria-label="@obituary.FullName"
+                        onclick="window.location.href='@Url.Action("Details", "ObituariesMvc", new { id = obituary.Id })'">
+                        
+                        
+                        @* For photo *@
+                        <div class="memorial-card__media">
+                            @if (obituary.Photo != null)
+                            {
+                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(obituary.Photo)" class="memorial-card__img"
+                                    alt="Portrait of @obituary.FullName" loading="lazy">
+                            }
+                            else
+                            {
+                                <div class="memorial-card__placeholder" aria-hidden="true">
+                                    <i class="bi bi-person-heart"></i>
+                                </div>
+                            }
+                        </div>
+
+                        @* For body *@
+                        <div class="card-body memorial-card__body">
+
+                            <h3 class="memorial-card__title">@obituary.FullName</h3>
+
+                            <p class="memorial-card__dates">
+                                <i class="bi bi-calendar-heart" aria-hidden="true"></i>
+                                @obituary.DateOfBirth.ToString("MMM dd, yyyy")
+                                <span class="sep">—</span>
+                                @obituary.DateOfDeath.ToString("MMM dd, yyyy")
+                            </p>
+
+                            <p class="memorial-card__bio">
+                                @{
+                                    var bio = obituary.Biography ?? "";
+                                    var shortBio = bio.Length > 160 ? bio.Substring(0, 160) + "…" : bio;
+                                }
+                                @shortBio
+                            </p>
+                        </div>
+
+
+                        <div class="card-footer memorial-card__footer">
+
+                            @* Second body *@
+                            <div class="memorial-meta text-center">
+                                <small class="text-muted d-block">
+                                    <i class="bi bi-eye" aria-hidden="true"></i>
+                                    Click to view full memorial
+                                </small>
+                                <small class="text-muted d-block">
+                                    <i class="bi bi-clock" aria-hidden="true"></i>
+                                    Added @obituary.CreatedAt.ToString("MMM dd, yyyy")
+                                </small>
+                            </div>
+
+                            @* Depending on user role, shows edit and delete buttons *@
+                            @if (User.IsInRole("Admin") ||
+                                                (User.Identity?.IsAuthenticated ?? false) &&
+                                                User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == obituary.CreatedByUserId)
+                            {
+                                <div class="memorial-actions" onclick="event.stopPropagation();">
+                                    <a asp-controller="ObituariesMvc" asp-action="Edit" asp-route-id="@obituary.Id"
+                                        class="btn btn-sm btn-outline-primary" title="Edit memorial">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a asp-controller="ObituariesMvc" asp-action="Delete" asp-route-id="@obituary.Id"
+                                        class="btn btn-sm btn-outline-danger" title="Delete memorial">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            }
+                        </div>
+
+                    </article>
+                </div>
+            }
+        </div>
+
+
+        <!-- Pagination -->
+        @if (totalPages > 1)
+        {
+            <nav class="memorial-pagination" aria-label="Memorial gallery pagination">
+
+                <!-- Showing info -->
+                <div class="memorial-pagination__info">
+                    <small>Showing @ViewBag.ShowingFrom–@ViewBag.ShowingTo of @ViewBag.TotalCount memorials</small>
+                </div>
+
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item @(ViewBag.HasPreviousPage ? "" : "disabled")">
+
+                        @* Previous page link *@
+                        @if (ViewBag.HasPreviousPage)
+                        {
+                            <a class="page-link" asp-action="Index" asp-route-page="@(currentPage - 1)"
+                                asp-route-searchTerm="@searchTerm" aria-label="Previous page">
+                                <i class="bi bi-chevron-left"></i> Previous
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="page-link"><i class="bi bi-chevron-left"></i> Previous</span>
+                        }
+                    </li>
+
+                    @{
+                        int startPage = Math.Max(1, currentPage - 2);
+                        int endPage = Math.Min(totalPages, currentPage + 2);
+                    }
+
+                    @* First page link *@
+                    @if (startPage > 1)
+                    {
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-page="1" asp-route-searchTerm="@searchTerm">1</a>
+                        </li>
+
+                        @* Ellipsis for skipped pages *@
+                        @if (startPage > 2)
+                        {
+                            <li class="page-item disabled"><span class="page-link">…</span></li>
+                        }
+                    }
+                    
+                    <!-- Page number links -->
+                    @for (int i = startPage; i <= endPage; i++)
+                    {
+                        <li class="page-item @(i == currentPage ? "active" : "")">
+                            @if (i == currentPage)
+                            {
+                                <span class="page-link" aria-current="page">@i</span>
+                            }
+                            else
+                            {
+                                <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-searchTerm="@searchTerm">@i</a>
+                            }
+                        </li>
+                    }
+
+                    @* Last page link *@
+                    @if (endPage < totalPages)
+                    {
+                        @if (endPage < totalPages - 1)
+                        {
+                            <li class="page-item disabled"><span class="page-link">…</span></li>
+                        }
+                        <li class="page-item">
+                            <a class="page-link" asp-action="Index" asp-route-page="@totalPages"
+                                asp-route-searchTerm="@searchTerm">@totalPages</a>
+                        </li>
+                    }
+
+                    @* Next page link *@
+                    <li class="page-item @(ViewBag.HasNextPage ? "" : "disabled")">
+                        @if (ViewBag.HasNextPage)
+                        {
+                            <a class="page-link" asp-action="Index" asp-route-page="@(currentPage + 1)"
+                                asp-route-searchTerm="@searchTerm" aria-label="Next page">
+                                Next <i class="bi bi-chevron-right"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="page-link">Next <i class="bi bi-chevron-right"></i></span>
+                        }
+                    </li>
+                </ul>
+            </nav>
+        }
+    }
+</div>
+
+@section Scripts {
+    <script src="~/js/memorial-gallery.js" asp-append-version="true"></script>
+    
+    @* Smooth scroll to results when search is active *@
+    @if (isSearchActive && (int?)ViewBag.SearchResultCount > 0)
+    {
+        <script>
+            window.addEventListener('DOMContentLoaded', () => {
+                setTimeout(() => {
+                    const firstCard = document.querySelector('.memorial-card');
+                    if (firstCard) firstCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 300);
+            });
+        </script>
+    }
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/memorial-gallery.css" asp-append-version="true" />
+}

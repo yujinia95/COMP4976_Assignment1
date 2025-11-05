@@ -1,0 +1,85 @@
+/*
+  Memorial Delete Styles
+*/
+:root {
+  --ink: #1f2530;
+  --muted: #6c7683;
+  --veil: #f6f8fb;
+  --card: #ffffff;
+  --line: #e6ebf1;
+  --accent: #6fa7e8;
+  --danger: #dc3545;
+  --shadow: 0 10px 28px rgba(20, 27, 44, .08);
+  --radius: 16px;
+}
+
+.memorial-hero--sub {
+  background: linear-gradient(180deg, #f5f7fb 0%, #fff 100%);
+  border-bottom: 1px solid var(--line);
+}
+
+.memorial-hero--sub .hero-inner {
+  text-align: center;
+  padding: 32px 0 18px;
+}
+
+.memorial-hero--sub .bi-exclamation-octagon {
+  font-size: 40px;
+  color: var(--danger);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.hero-title {
+  color: var(--ink);
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+.hero-subtitle {
+  color: var(--muted);
+  margin: 0;
+}
+
+.memorial-form-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.memorial-photo .photo-placeholder {
+  height: 240px;
+  border: 1px dashed #cfd8e3;
+  border-radius: 12px;
+  background: #fbfcfe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c2cbd8;
+  font-size: 64px;
+}
+
+.memorial-name {
+  margin: 0 0 6px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.memorial-dates {
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+
+.memorial-dates .sep {
+  margin: 0 6px;
+}
+
+.memorial-bio p {
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+.alert i {
+  font-size: 1.1rem;
+  margin-top: 2px;
+}

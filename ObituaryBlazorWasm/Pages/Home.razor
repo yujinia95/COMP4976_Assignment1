@@ -1,0 +1,128 @@
+﻿@page "/"
+@inject HttpClient Http
+
+<PageTitle>Home</PageTitle>
+
+<h1>Welcome to the Obituary App</h1>
+
+@if (obituaries == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (obituaries.Count == 0)
+{
+    <p>No obituaries found.</p>
+}
+else
+{
+    <div class="obituary-list">
+        @foreach (var o in pagedObituaries)
+        {
+            <div class="obituary-card">
+                @if (o.Photo != null && o.Photo.Length > 0)
+                {
+                    <img src="data:image/jpeg;base64,@Convert.ToBase64String(o.Photo)" alt="@o.FullName" class="obituary-photo" />
+                }
+                else
+                {
+                    <img src="images/default-avatar.png" alt="No photo" class="obituary-photo" />
+                }
+
+                <h3>
+                    <a href="@($"/obituary/{o.Id}")">@o.FullName</a>
+                </h3>
+
+                <p><strong>Born:</strong> @o.DateOfBirth.ToString("MMMM dd, yyyy")</p>
+                <p><strong>Died:</strong> @o.DateOfDeath.ToString("MMMM dd, yyyy")</p>
+
+                @if (expandedObituaries.Contains(o.Id))
+                {
+                    <p>@o.Biography</p>
+                    <button class="readmore-btn" @onclick="() => ToggleReadMore(o.Id)">Read less</button>
+                }
+                else
+                {
+                    var shortBio = o.Biography.Length > 100 ? o.Biography.Substring(0, 100) + "..." : o.Biography;
+                    <p>@shortBio</p>
+                    @if (o.Biography.Length > 100)
+                    {
+                        <button class="readmore-btn" @onclick="() => ToggleReadMore(o.Id)">Read more</button>
+                    }
+                }
+
+                <hr />
+            </div>
+        }
+    </div>
+
+    <div class="pagination">
+        <button @onclick="PreviousPage" disabled="@(!CanGoPrevious)">Previous</button>
+        <span>Page @currentPage of @totalPages</span>
+        <button @onclick="NextPage" disabled="@(!CanGoNext)">Next</button>
+    </div>
+}
+
+@code {
+    private List<ObituaryBlazorWasm.Models.Obituary>? obituaries;
+    private List<ObituaryBlazorWasm.Models.Obituary> pagedObituaries = new();
+    private HashSet<int> expandedObituaries = new();
+
+    private int currentPage = 1;
+    private int pageSize = 4; // Show 4 obituaries per page
+    private int totalPages => (int)Math.Ceiling((decimal)(obituaries?.Count ?? 0) / pageSize);
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            obituaries = await Http.GetFromJsonAsync<List<ObituaryBlazorWasm.Models.Obituary>>(
+                "/api/obituaries"
+            );
+            UpdatePagedObituaries();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error fetching obituaries: {ex.Message}");
+            obituaries = new List<ObituaryBlazorWasm.Models.Obituary>();
+        }
+    }
+
+    private void UpdatePagedObituaries()
+    {
+        if (obituaries == null) return;
+
+        pagedObituaries = obituaries
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
+
+    private void NextPage()
+    {
+        if (CanGoNext)
+        {
+            currentPage++;
+            UpdatePagedObituaries();
+        }
+    }
+
+    private void PreviousPage()
+    {
+        if (CanGoPrevious)
+        {
+            currentPage--;
+            UpdatePagedObituaries();
+        }
+    }
+
+    private bool CanGoNext => currentPage < totalPages;
+    private bool CanGoPrevious => currentPage > 1;
+
+    private void ToggleReadMore(int id)
+    {
+        if (expandedObituaries.Contains(id))
+            expandedObituaries.Remove(id);
+        else
+            expandedObituaries.Add(id);
+    }
+}

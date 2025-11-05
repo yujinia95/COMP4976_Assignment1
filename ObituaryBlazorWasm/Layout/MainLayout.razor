@@ -1,0 +1,68 @@
+﻿@inherits LayoutComponentBase
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4 d-flex justify-content-end align-items-center" style="background-color:#f5f5f5; padding:10px;">
+            @if (IsLoggedIn)
+            {
+                <button class="btn btn-link login-link" @onclick="Logout">Logout</button>
+            }
+            else
+            {
+                <a href="login" class="login-link">Login</a>
+            }
+        </div>
+        
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+<style>
+    .login-link {
+        color: #007bff;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .login-link:hover {
+        text-decoration: underline;
+    }
+
+    .top-row {
+        border-bottom: 1px solid #ddd;
+    }
+</style>
+
+@code {
+    private bool IsLoggedIn;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var token = await JS.InvokeAsync<string>("localStorage.getItem", "accessToken");
+            IsLoggedIn = !string.IsNullOrEmpty(token);
+        }
+        catch
+        {
+            IsLoggedIn = false;
+        }
+    }
+
+    private async Task Logout()
+    {
+        await JS.InvokeVoidAsync("localStorage.removeItem", "accessToken");
+        IsLoggedIn = false;
+        // navigate to home (refreshes UI)
+        Navigation.NavigateTo("/");
+    }
+}
