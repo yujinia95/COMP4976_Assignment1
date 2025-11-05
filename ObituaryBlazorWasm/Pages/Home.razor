@@ -23,10 +23,6 @@ else
                 {
                     <img src="data:image/jpeg;base64,@Convert.ToBase64String(o.Photo)" alt="@o.FullName" class="obituary-photo" />
                 }
-                else
-                {
-                    <img src="images/default-avatar.png" alt="No photo" class="obituary-photo" />
-                }
 
                 <h3>
                     <a href="@($"/obituary/{o.Id}")">@o.FullName</a>

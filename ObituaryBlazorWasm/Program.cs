@@ -2,10 +2,14 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using ObituaryBlazorWasm;
+using ObituaryBlazorWasm.Services;
 
 // Create a new WebAssembly host builder instance
 // This sets up the Blazor WebAssembly environment, configuration, and DI container.
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
+
+// Register the AuthState service for managing authentication state across components
+builder.Services.AddScoped<AuthState>();
 
 // Register the root component (<App />) and specify where it should be rendered in index.html
 builder.RootComponents.Add<App>("#app");

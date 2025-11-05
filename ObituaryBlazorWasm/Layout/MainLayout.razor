@@ -1,6 +1,9 @@
-﻿@inherits LayoutComponentBase
+﻿@using ObituaryBlazorWasm.Services
+@inherits LayoutComponentBase
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
+@inject ObituaryBlazorWasm.Services.AuthState Auth
+
 
 <div class="page">
     <div class="sidebar">
@@ -45,24 +48,28 @@
 @code {
     private bool IsLoggedIn;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        try
-        {
-            var token = await JS.InvokeAsync<string>("localStorage.getItem", "accessToken");
-            IsLoggedIn = !string.IsNullOrEmpty(token);
-        }
-        catch
-        {
-            IsLoggedIn = false;
-        }
+        // Subscribe to AuthState changes
+        Auth.OnChange += OnAuthStateChanged;
+        IsLoggedIn = Auth.IsLoggedIn;
+    }
+
+    private void OnAuthStateChanged()
+    {
+        IsLoggedIn = Auth.IsLoggedIn;
+        InvokeAsync(StateHasChanged); // <— Force UI re-render on state change
     }
 
     private async Task Logout()
     {
         await JS.InvokeVoidAsync("localStorage.removeItem", "accessToken");
-        IsLoggedIn = false;
-        // navigate to home (refreshes UI)
+        Auth.IsLoggedIn = false;
         Navigation.NavigateTo("/");
+    }
+
+    public void Dispose()
+    {
+        Auth.OnChange -= OnAuthStateChanged;
     }
 }

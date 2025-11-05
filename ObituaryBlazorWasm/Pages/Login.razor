@@ -2,6 +2,7 @@
 @inject HttpClient Http
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
+@inject ObituaryBlazorWasm.Services.AuthState Auth
 @using System.Net.Http.Json
 @using Microsoft.JSInterop
 
@@ -77,7 +78,10 @@ else
                     // Optional: Save token to localStorage for future API calls
                     await JS.InvokeVoidAsync("localStorage.setItem", "accessToken", result.accessToken);
 
-                    // Redirect to Home page after successful login
+                    // Update shared auth state so layout and other components update immediately
+                    Auth.IsLoggedIn = true;
+
+                    // Redirect to Home page after successful login (client-side)
                     Navigation.NavigateTo("/");
                 }
             }
