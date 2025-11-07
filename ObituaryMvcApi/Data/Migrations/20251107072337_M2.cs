@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace ObituaryMvcApi.Migrations
+namespace ObituaryMvcApi.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialSqlServerMigration : Migration
+    public partial class M2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

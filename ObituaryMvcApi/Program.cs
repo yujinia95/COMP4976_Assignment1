@@ -23,13 +23,14 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 // Database connection
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+// var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+//     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+builder.AddSqlServerDbContext<ApplicationDbContext>("sqldata");
 
 // builder.Services.AddDbContext<ApplicationDbContext>(options =>
 //     options.UseSqlite(connectionString));
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+// builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//     options.UseSqlServer(connectionString));
 
 // Authorization middleware
 builder.Services.AddAuthorization(options =>
