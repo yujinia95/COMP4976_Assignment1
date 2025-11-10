@@ -33,7 +33,7 @@
 
 .hero-title {
   font-weight: 700;
-  letter-spacing: .3px;
+  letter-spacing: 0.3px;
   color: var(--ink);
   margin-bottom: 4px;
 }
@@ -95,7 +95,7 @@
 .empty-state__icon {
   font-size: 56px;
   color: var(--muted);
-  opacity: .55;
+  opacity: 0.55;
 }
 
 .empty-state__title {
@@ -113,13 +113,24 @@
   margin-top: 10px;
 }
 
+/* Make cards in the same row equal height and keep footer at the bottom */
+.memorial-grid .row {
+  align-items: stretch;
+}
+
+.memorial-grid .row > [class*="col-"] {
+  display: flex;
+}
+
 .memorial-card {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   overflow: hidden;
   background: var(--card);
-  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
 }
 
 .memorial-card:hover {
@@ -152,6 +163,9 @@
 
 .memorial-card__body {
   padding: 16px 16px 8px;
+  /* allow body to grow and keep footer pinned to bottom */
+  flex: 1 1 auto;
+  overflow: hidden;
 }
 
 .memorial-card__title {
@@ -165,7 +179,7 @@
   text-align: center;
   color: var(--muted);
   margin: 0 0 10px 0;
-  font-size: .95rem;
+  font-size: 0.95rem;
 }
 
 .memorial-card__dates .sep {
@@ -176,14 +190,22 @@
 .memorial-card__bio {
   color: var(--ink);
   line-height: 1.5;
-  min-height: 3.0em;
+  min-height: 3em;
   margin: 0;
+  /* clamp long bios to keep card heights uniform */
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .memorial-card__footer {
   background: #fff;
   border-top: 1px solid var(--line);
   padding: 12px 12px 14px;
+  flex: 0 0 auto;
 }
 
 .memorial-actions {
@@ -241,6 +263,6 @@ mark.bg-warning {
 .memorial-search__submit:focus,
 .memorial-search__clear:focus,
 .pagination .page-link:focus {
-  outline: 3px solid rgba(13, 110, 253, .35);
+  outline: 3px solid rgba(13, 110, 253, 0.35);
   outline-offset: 2px;
 }
