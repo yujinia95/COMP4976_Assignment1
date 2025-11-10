@@ -1,82 +1,108 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using ObivtuaryMvcApi.Data;
-using ObivtuaryMvcApi.Models;
+using ObituaryMvcApi.Data;
+using ObituaryMvcApi.Services;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using Microsoft.Extensions.Hosting;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// builder.AddServiceDefaults();
-// Add services to the container.
-// Swagger
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
-// Configure JSON options for minimal APIs
+// Configure Swagger to include controller-based API endpoints only
+builder.Services.AddSwaggerGen(c =>
+{
+    c.DocInclusionPredicate((docName, apiDesc) =>
+    {
+        var actionDescriptor = apiDesc.ActionDescriptor;
+        return actionDescriptor?.RouteValues != null && actionDescriptor.RouteValues.ContainsKey("controller");
+    });
+});
+
+// Configure JSON serializer for consistent camelCase output
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
     options.SerializerOptions.WriteIndented = true;
 });
 
-// Database connection
-// var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
-//     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+// Database connection (uses service defaults)
 builder.AddSqlServerDbContext<ApplicationDbContext>("sqldata");
-
-// builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//     options.UseSqlite(connectionString));
-// builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//     options.UseSqlServer(connectionString));
 
 // Authorization middleware
 builder.Services.AddAuthorization(options =>
 {
+    // ApiPolicy requires an authenticated user (supports JWT Bearer tokens)
     options.AddPolicy("ApiPolicy", policy =>
         policy.RequireAuthenticatedUser()
-              .AddAuthenticationSchemes(IdentityConstants.BearerScheme));
+              .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme));
 });
 // catch database errors
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+// Configure JWT authentication for API clients
+var jwtSection  = builder.Configuration.GetSection("Jwt");
+var jwtKey      = jwtSection.GetValue<string>("Key") ?? string.Empty;
+var jwtIssuer   = jwtSection.GetValue<string>("Issuer");
+var jwtAudience = jwtSection.GetValue<string>("Audience");
+var keyBytes    = Encoding.UTF8.GetBytes(jwtKey);
 
-// Add Authentication schemes
+// This jwt code configures the API to use JWT Bearer tokens for authentication on requests.
+// Completely different role from the code in JwtTokenService.cs that creates the tokens.
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = IdentityConstants.BearerScheme;
-    options.DefaultChallengeScheme = IdentityConstants.BearerScheme;
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme    = JwtBearerDefaults.AuthenticationScheme;
 })
-    .AddBearerToken(IdentityConstants.BearerScheme);
+    .AddJwtBearer(options =>
+    {
+        options.RequireHttpsMetadata      = true;
+        options.SaveToken                 = true;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer           = true,
+            ValidateAudience         = true,
+            ValidateLifetime         = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer              = jwtIssuer,
+            ValidAudience            = jwtAudience,
+            IssuerSigningKey         = new SymmetricSecurityKey(keyBytes)
+        };
+    });
 
 // Add Identity with roles
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {
-    options.Stores.MaxLengthForKeys = 128; // Key/ID length
+    options.Stores.MaxLengthForKeys = 128;          // Key/ID length
 
     // Password settings
-    options.Password.RequireDigit = true; // at least one digit
-    options.Password.RequireLowercase = true; // at least one lowercase letter
-    options.Password.RequireNonAlphanumeric = true; // at least one special character required (examples: ! @ # $ % ^ & * ( ) - _ = + . , and also spaces)
-    options.Password.RequireUppercase = true; // at least one uppercase letter
-    options.Password.RequiredLength = 8; // minimum length
-    options.Password.RequiredUniqueChars = 1; // at least one unique character
-    
+    options.Password.RequireDigit           = true;          // at least one digit
+    options.Password.RequireLowercase       = true;          // at least one lowercase letter
+    options.Password.RequireNonAlphanumeric = true;          // at least one special character required (examples: ! @ # $ % ^ & * ( ) - _ = + . , and also spaces)
+    options.Password.RequireUppercase       = true;          // at least one uppercase letter
+    options.Password.RequiredLength         = 8;             // minimum length
+    options.Password.RequiredUniqueChars    = 1;             // at least one unique character
+
     // Sign-in settings - require confirmed account for login
     options.SignIn.RequireConfirmedAccount = false; // Set to false to allow immediate login after registration
 })
-.AddEntityFrameworkStores<ApplicationDbContext>() // Store users and roles in the database
-.AddRoles<IdentityRole>() // Add role management RoleManager<IdentityRole>, UserManager<IdentityUser>
-.AddDefaultUI() // Add the default UI (Razor pages for login, register, etc.)
-.AddDefaultTokenProviders() // Add token providers for password reset, email confirmation, etc.
-.AddApiEndpoints(); // Add API endpoints support
+.AddEntityFrameworkStores<ApplicationDbContext>()   // Store users and roles in the database
+.AddRoles<IdentityRole>()                           // Add role management RoleManager<IdentityRole>, UserManager<IdentityUser>
+.AddDefaultUI()                                     // Add the default UI (Razor pages for login, register, etc.)
+.AddDefaultTokenProviders()                         // Add token providers for password reset, email confirmation, etc.
+.AddApiEndpoints();                                 // Add API endpoints support
 
 builder.Services.AddControllersWithViews();
 
+// Register JWT token generator service
+builder.Services.AddScoped<ObituaryMvcApi.Services.IJwtTokenService, ObituaryMvcApi.Services.JwtTokenService>();
+
 // Add CORS
-builder.Services.AddCors(o => o.AddPolicy("AllowAllPolicy", builder => {
+builder.Services.AddCors(o => o.AddPolicy("AllowAllPolicy", builder =>
+{
     builder.AllowAnyOrigin()
         .AllowAnyMethod()
         .AllowAnyHeader();
@@ -84,19 +110,11 @@ builder.Services.AddCors(o => o.AddPolicy("AllowAllPolicy", builder => {
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-// if (app.Environment.IsDevelopment())
-// {
-//     app.UseMigrationsEndPoint();
-//     app.UseSwagger();
-//     app.UseSwaggerUI();
-// }
-// else
-// {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-// }
+
+app.UseExceptionHandler("/Home/Error");
+// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+app.UseHsts();
+
 
 app.UseHttpsRedirection();
 
@@ -169,195 +187,7 @@ if (app.Environment.IsDevelopment() || enableSwagger)
     app.UseSwaggerUI();
 }
 
-// Minimal API endpoints for Obituaries
-// GET /api/obituaries - Get all obituaries
-app.MapGet("/api/obituaries", async (ApplicationDbContext context) =>
-{
-    var obituaries = await context.Obituaries.ToListAsync();
-    return Results.Ok(obituaries);
-})
-.WithName("GetObituaries")
-.WithTags("Obituaries")
-.WithOpenApi();
-
-// GET /api/obituaries/{id} - Get specific obituary by ID
-app.MapGet("/api/obituaries/{id:int}", async (int id, ApplicationDbContext context) =>
-{
-    var obituary = await context.Obituaries.FindAsync(id);
-    
-    if (obituary == null)
-    {
-        return Results.NotFound($"Obituary with ID {id} not found.");
-    }
-    
-    return Results.Ok(obituary);
-})
-.WithName("GetObituary")
-.WithTags("Obituaries")
-.WithOpenApi();
-
-// POST /api/obituaries - Create new obituary (requires authentication)
-app.MapPost("/api/obituaries", async (ObituaryCreateDto obituaryDto, ApplicationDbContext context, ClaimsPrincipal user) =>
-{
-    // Validate date logic
-    if (obituaryDto.DateOfDeath < obituaryDto.DateOfBirth)
-    {
-        return Results.BadRequest("Date of Death cannot be before Date of Birth.");
-    }
-
-    if (obituaryDto.DateOfBirth > DateTime.Now)
-    {
-        return Results.BadRequest("Date of Birth cannot be in the future.");
-    }
-
-    if (obituaryDto.DateOfDeath > DateTime.Now)
-    {
-        return Results.BadRequest("Date of Death cannot be in the future.");
-    }
-
-    var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
-
-    var obituary = new Obituary
-    {
-        FullName = obituaryDto.FullName,
-        DateOfBirth = obituaryDto.DateOfBirth,
-        DateOfDeath = obituaryDto.DateOfDeath,
-        Biography = obituaryDto.Biography,
-        Photo = obituaryDto.Photo,
-        CreatedByUserId = userId,
-        CreatedAt = DateTime.UtcNow,
-        UpdatedAt = DateTime.UtcNow
-    };
-
-    context.Obituaries.Add(obituary);
-    await context.SaveChangesAsync();
-
-    return Results.CreatedAtRoute("GetObituary", new { id = obituary.Id }, obituary);
-})
-.RequireAuthorization("ApiPolicy")
-.WithName("CreateObituary")
-.WithTags("Obituaries")
-.WithOpenApi();
-
-// PUT /api/obituaries/{id} - Update obituary (requires authentication)
-app.MapPut("/api/obituaries/{id:int}", async (int id, ObituaryUpdateDto obituaryDto, ApplicationDbContext context, ClaimsPrincipal user) =>
-{
-    var obituary = await context.Obituaries.FindAsync(id);
-    if (obituary == null)
-    {
-        return Results.NotFound($"Obituary with ID {id} not found.");
-    }
-
-    var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-    var isAdmin = user.IsInRole("Admin");
-    
-    // If CreatedByUserId is null/empty, only Admins may update.
-    if ((string.IsNullOrEmpty(obituary.CreatedByUserId) || obituary.CreatedByUserId != userId) && !isAdmin)
-    {
-        return Results.Problem("You can only update obituaries you created, or you must be an Admin.", statusCode: 403);
-    }
-
-    // Validate date logic
-    if (obituaryDto.DateOfDeath < obituaryDto.DateOfBirth)
-    {
-        return Results.BadRequest("Date of Death cannot be before Date of Birth.");
-    }
-
-    if (obituaryDto.DateOfBirth > DateTime.Now)
-    {
-        return Results.BadRequest("Date of Birth cannot be in the future.");
-    }
-
-    if (obituaryDto.DateOfDeath > DateTime.Now)
-    {
-        return Results.BadRequest("Date of Death cannot be in the future.");
-    }
-
-    obituary.FullName = obituaryDto.FullName;
-    obituary.DateOfBirth = obituaryDto.DateOfBirth;
-    obituary.DateOfDeath = obituaryDto.DateOfDeath;
-    obituary.Biography = obituaryDto.Biography;
-    obituary.Photo = obituaryDto.Photo;
-    obituary.UpdatedAt = DateTime.UtcNow;
-
-    try
-    {
-        await context.SaveChangesAsync();
-    }
-    catch (DbUpdateConcurrencyException)
-    {
-        if (!context.Obituaries.Any(e => e.Id == id))
-        {
-            return Results.NotFound();
-        }
-        else
-        {
-            throw;
-        }
-    }
-
-    return Results.NoContent();
-})
-.RequireAuthorization("ApiPolicy")
-.WithName("UpdateObituary")
-.WithTags("Obituaries")
-.WithOpenApi();
-
-// DELETE /api/obituaries/{id} - Delete obituary (requires authentication)
-app.MapDelete("/api/obituaries/{id:int}", async (int id, ApplicationDbContext context, ClaimsPrincipal user) =>
-{
-
-    var obituary = await context.Obituaries.FindAsync(id);
-    if (obituary == null)
-    {
-        return Results.NotFound($"Obituary with ID {id} not found.");
-    }
-
-    var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-    var isAdmin = user.IsInRole("Admin");
-    
-    // If CreatedByUserId is null/empty, only Admins may delete.
-    if ((string.IsNullOrEmpty(obituary.CreatedByUserId) || obituary.CreatedByUserId != userId) && !isAdmin)
-    {
-        return Results.Problem("You can only delete obituaries you created, or you must be an Admin.", statusCode: 403);
-    }
-
-    context.Obituaries.Remove(obituary);
-    await context.SaveChangesAsync();
-
-    return Results.NoContent();
-})
-.RequireAuthorization("ApiPolicy")
-.WithName("DeleteObituary")
-.WithTags("Obituaries")
-.WithOpenApi();
-
-// GET /api/obituaries/my-obituaries - Get current user's obituaries (requires authentication)
-app.MapGet("/api/obituaries/my-obituaries", async (ApplicationDbContext context, ClaimsPrincipal user) =>
-{
-    // Check if user is authenticated
-    if (!user.Identity?.IsAuthenticated ?? true)
-    {
-        return Results.Unauthorized();
-    }
-
-    var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-    if (string.IsNullOrEmpty(userId))
-    {
-        return Results.Unauthorized();
-    }
-
-    var obituaries = await context.Obituaries
-        .Where(o => o.CreatedByUserId == userId)
-        .ToListAsync();
-
-    return Results.Ok(obituaries);
-})
-.RequireAuthorization("ApiPolicy")
-.WithName("GetMyObituaries")
-.WithTags("Obituaries")
-.WithOpenApi();
+// Controller-based APIs: map attribute-routed controllers (our ObituariesApiController)
+app.MapControllers();
 
 app.Run();

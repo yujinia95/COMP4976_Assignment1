@@ -1,8 +1,8 @@
 using System;
 using Microsoft.AspNetCore.Identity;
-using ObivtuaryMvcApi.Models;
+using ObituaryMvcApi.Models;
 
-namespace ObivtuaryMvcApi.Data;
+namespace ObituaryMvcApi.Data;
 
 public class IdentitySeedData
 {

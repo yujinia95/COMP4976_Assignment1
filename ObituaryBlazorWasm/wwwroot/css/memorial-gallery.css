@@ -1,0 +1,246 @@
+/*
+  Memorial Gallery Styles
+*/
+:root {
+  --ink: #1e2329;
+  --muted: #6c757d;
+  --veil: #f8f9fb;
+  --card: #ffffff;
+  --line: #e9eef3;
+  --accent: #6fa7e8;
+  --accent-ink: #0d3a66;
+  --focus: #0d6efd;
+  --shadow: 0 8px 24px rgba(17, 24, 39, 0.08);
+  --radius: 16px;
+}
+
+.memorial-hero {
+  background: linear-gradient(180deg, #f6f8fb 0%, #ffffff 100%);
+  border-bottom: 1px solid var(--line);
+}
+
+.memorial-hero .hero-inner {
+  padding: 40px 0 28px;
+  text-align: center;
+}
+
+.memorial-hero .bi-flower1 {
+  font-size: 42px;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.hero-title {
+  font-weight: 700;
+  letter-spacing: .3px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.hero-subtitle {
+  color: var(--muted);
+  margin: 0;
+}
+
+/* Search */
+.memorial-search {
+  margin-top: 16px;
+}
+
+.memorial-search__group {
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--line);
+}
+
+.memorial-search__icon {
+  background: transparent;
+  border: none;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.memorial-search__input {
+  border: none !important;
+  box-shadow: none !important;
+  padding-left: 8px;
+}
+
+.memorial-search__input:focus {
+  outline: none;
+}
+
+.memorial-search__clear {
+  border: none;
+  background: transparent;
+}
+
+.memorial-search__submit {
+  border: none;
+  border-left: 1px solid var(--line);
+  min-width: 140px;
+}
+
+.memorial-search__submit .busy.d-none {
+  display: none;
+}
+
+.empty-state {
+  padding: 64px 0 72px;
+}
+
+.empty-state__icon {
+  font-size: 56px;
+  color: var(--muted);
+  opacity: .55;
+}
+
+.empty-state__title {
+  margin-top: 12px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.empty-state__text {
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.memorial-grid {
+  margin-top: 10px;
+}
+
+.memorial-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--card);
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  cursor: pointer;
+}
+
+.memorial-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+  border-color: #d6e6f8;
+}
+
+.memorial-card__media {
+  position: relative;
+  height: 260px;
+  background: #f3f5f8;
+}
+
+.memorial-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.memorial-card__placeholder {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c3cbd6;
+  font-size: 64px;
+}
+
+.memorial-card__body {
+  padding: 16px 16px 8px;
+}
+
+.memorial-card__title {
+  margin: 0 0 6px 0;
+  text-align: center;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.memorial-card__dates {
+  text-align: center;
+  color: var(--muted);
+  margin: 0 0 10px 0;
+  font-size: .95rem;
+}
+
+.memorial-card__dates .sep {
+  display: inline-block;
+  margin: 0 4px;
+}
+
+.memorial-card__bio {
+  color: var(--ink);
+  line-height: 1.5;
+  min-height: 3.0em;
+  margin: 0;
+}
+
+.memorial-card__footer {
+  background: #fff;
+  border-top: 1px solid var(--line);
+  padding: 12px 12px 14px;
+}
+
+.memorial-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.memorial-pagination {
+  margin-top: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+
+.memorial-pagination__info small {
+  color: var(--muted);
+}
+
+.pagination {
+  box-shadow: var(--shadow);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.pagination .page-link {
+  border: none;
+  color: var(--ink);
+}
+
+.pagination .page-item.active .page-link {
+  background-color: var(--accent);
+  color: #fff;
+}
+
+.pagination .page-link:hover {
+  background: #f5f7fb;
+}
+
+mark.bg-warning {
+  background: #fff1a6 !important;
+  color: inherit;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.memorial-card:focus,
+.memorial-search__input:focus,
+.memorial-search__submit:focus,
+.memorial-search__clear:focus,
+.pagination .page-link:focus {
+  outline: 3px solid rgba(13, 110, 253, .35);
+  outline-offset: 2px;
+}

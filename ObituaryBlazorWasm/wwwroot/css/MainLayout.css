@@ -1,0 +1,131 @@
+/*
+  Navbar Styles
+*/
+:root {
+  --ink: #1f2530;
+  --muted: #6c7683;
+  --veil: #f6f8fb;
+  --card: #ffffff;
+  --line: #e6ebf1;
+  --accent: #6fa7e8;
+  --accent-ink: #0d3a66;
+  --focus: #0d6efd;
+  --shadow: 0 10px 28px rgba(20, 27, 44, .08);
+  --radius: 16px;
+}
+
+.memorial-body {
+  background: #fff;
+  color: var(--ink);
+}
+
+.memorial-navbar {
+  box-shadow: 0 2px 12px rgba(17, 24, 39, 0.04);
+}
+
+.navbar-brand {
+  letter-spacing: .2px;
+}
+
+.text-accent {
+  color: var(--accent) !important;
+}
+
+.btn-accent {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--accent);
+  --bs-btn-border-color: var(--accent);
+  --bs-btn-hover-bg: #5f97d7;
+  --bs-btn-hover-border-color: #5f97d7;
+  --bs-btn-focus-shadow-rgb: 13, 110, 253;
+}
+
+.memorial-subhero {
+  background: linear-gradient(180deg, #f7f9fd 0%, #ffffff 100%);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.memorial-main {
+  min-height: calc(100vh - 180px);
+}
+
+.memorial-footer {
+  background: #fff;
+}
+
+.memorial-footer .link-muted {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.memorial-footer .link-muted:hover {
+  text-decoration: underline;
+}
+
+a {
+  color: var(--accent-ink);
+}
+
+a:hover {
+  color: var(--accent);
+}
+
+.nav-pills .nav-link.active,
+.nav-pills .show>.nav-link {
+  color: #fff;
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+.border-top {
+  border-top: 1px solid var(--line) !important;
+}
+
+.border-bottom {
+  border-bottom: 1px solid var(--line) !important;
+}
+
+.box-shadow {
+  box-shadow: var(--shadow);
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+
+.btn-primary:hover {
+  background-color: #5f97d7;
+  border-color: #5f97d7;
+}
+
+:focus-visible {
+  outline: 3px solid rgba(13, 110, 253, .35);
+  outline-offset: 2px;
+}
+
+button.accept-policy {
+  font-size: 1rem;
+  line-height: inherit;
+}
+
+.footer {
+  position: static;
+  line-height: inherit;
+  width: 100%;
+}
+
+.memorial-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  background: var(--card);
+}
+
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1140px;
+  }
+}

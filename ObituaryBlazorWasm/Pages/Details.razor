@@ -1,0 +1,181 @@
+@page "/obituaries/details/{id:int}"
+@using ObituaryBlazorWasm.Models
+@using System.IdentityModel.Tokens.Jwt
+@using System.Security.Claims
+@inject ObituaryBlazorWasm.Services.ObituaryApiClient Api
+@inject ObituaryBlazorWasm.Services.ITokenProvider TokenProvider
+@inject NavigationManager Nav
+
+<PageTitle>Memorial Details</PageTitle>
+
+@if (IsLoading)
+{
+    <div class="container py-5 text-center text-muted">Loading…</div>
+}
+else if (Obituary is null)
+{
+    <div class="container py-5 text-center text-muted">Memorial not found.</div>
+}
+else
+{
+    <div class="memorial-hero--sub">
+        <div class="container hero-inner">
+            <i class="bi bi-person-heart"></i>
+            <h1 class="hero-title h3">@Obituary.FullName</h1>
+            <p class="hero-subtitle">
+                @Obituary.DateOfBirth.ToString("yyyy-MM-dd") <span class="sep">—</span> @Obituary.DateOfDeath.ToString("yyyy-MM-dd")
+            </p>
+        </div>
+    </div>
+
+    <div class="container my-4">
+        <div class="row g-4">
+            <div class="col-12 col-lg-8">
+                <div class="card memorial-summary @(FadeIn ? "appear" : "")">
+                    <div class="memorial-photo">
+                        @if (!string.IsNullOrEmpty(PhotoUrl))
+                        {
+                            <img src="@PhotoUrl" alt="@Obituary.FullName" />
+                        }
+                        else
+                        {
+                            <div class="photo-placeholder">
+                                <i class="bi bi-person"></i>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="card-body">
+                        <h2 class="memorial-name">@Obituary.FullName</h2>
+                        <p class="memorial-dates">
+                            @Obituary.DateOfBirth.ToString("yyyy-MM-dd") <span class="sep">—</span> @Obituary.DateOfDeath.ToString("yyyy-MM-dd")
+                        </p>
+                    </div>
+
+                    <div class="card-footer text-end">
+                        <small>Created @Obituary.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</small>
+                    </div>
+                </div>
+
+                <div class="memorial-bio mt-4 card @(FadeIn ? "appear" : "")">
+                    <div class="card-body">
+                        <h5 class="mb-3">Biography</h5>
+
+                        <div id="bioContainer" class="@BioContainerClass">
+                            @if (!string.IsNullOrWhiteSpace(Obituary.Biography))
+                            {
+                                @((MarkupString)Obituary.Biography.Replace("\n", "<br/>"))
+                            }
+                            else
+                            {
+                                <p class="text-muted">No biography available.</p>
+                            }
+                        </div>
+
+                        @if (NeedsToggle)
+                        {
+                            <div id="bioFade" class="@FadeClass"></div>
+                            <button id="toggleBio"
+                                    class="btn btn-link p-0 mt-2"
+                                    @onclick="ToggleBiography"
+                                    aria-expanded="@Expanded">
+                                @(Expanded ? "Show less" : "Read more")
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <a class="btn btn-outline-secondary" href="/">
+                        <i class="bi bi-arrow-left"></i> Back to list
+                    </a>
+                    @if (CanEditOrDelete)
+                    {
+                        <a class="btn btn-primary ms-2" href="@($"/obituaries/edit/{Obituary.Id}")">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </a>
+                        <a class="btn btn-danger ms-2" href="@($"/obituaries/delete/{Obituary.Id}")">
+                            <i class="bi bi-trash"></i> Delete
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Obituary? Obituary;
+    private bool IsLoading = true;
+    private string? PhotoUrl;
+    private bool FadeIn;
+    private bool CanEditOrDelete = false;
+    private string? CurrentUserId;
+    private bool IsAdmin = false;
+
+    // Biography toggle
+    private bool NeedsToggle;
+    private bool Expanded;
+    private string BioContainerClass => Expanded ? "biography-content biography-content--expanded" : "biography-content";
+    private string FadeClass => Expanded ? "bio-fade d-none" : "bio-fade";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Get current user info from token
+        await LoadUserInfoFromToken();
+
+        Obituary = await Api.GetAsync(Id);
+        if (Obituary?.Photo is { Length: > 0 })
+        {
+            var base64 = Convert.ToBase64String(Obituary.Photo);
+            PhotoUrl = $"data:image/jpeg;base64,{base64}";
+        }
+
+        // Check if current user can edit/delete
+        if (!string.IsNullOrEmpty(CurrentUserId) && Obituary != null)
+        {
+            CanEditOrDelete = IsAdmin || Obituary.CreatedByUserId == CurrentUserId;
+        }
+
+        // Check if biography is long enough to need toggle (simulate same JS behavior)
+        if (!string.IsNullOrEmpty(Obituary?.Biography) && Obituary.Biography.Length > 500)
+            NeedsToggle = true;
+
+        IsLoading = false;
+
+        // Delay fade-in effect
+        await Task.Delay(150);
+        FadeIn = true;
+    }
+
+    private async Task LoadUserInfoFromToken()
+    {
+        var token = await TokenProvider.GetTokenAsync();
+        if (string.IsNullOrEmpty(token))
+            return;
+
+        try
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+
+            // Get user ID from NameIdentifier claim
+            CurrentUserId = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            // Get role from Role claim
+            var role = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            IsAdmin = role == "Admin";
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error decoding token: {ex.Message}");
+        }
+    }
+
+    private void ToggleBiography()
+    {
+        Expanded = !Expanded;
+    }
+}

@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ObivtuaryMvcApi.Data;
-using ObivtuaryMvcApi.Models;
+using ObituaryMvcApi.Data;
+using ObituaryMvcApi.Models;
 
-namespace ObivtuaryMvcApi.Controllers;
+namespace ObituaryMvcApi.Controllers;
 
 public class HomeController : Controller
 {

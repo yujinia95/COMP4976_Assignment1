@@ -1,75 +1,99 @@
-﻿@using ObituaryBlazorWasm.Services
+﻿<!-- This file defines the navigation layout -->
+
 @inherits LayoutComponentBase
-@inject IJSRuntime JS
-@inject NavigationManager Navigation
-@inject ObituaryBlazorWasm.Services.AuthState Auth
+@using Microsoft.AspNetCore.Components.Routing
+@inject ObituaryBlazorWasm.Services.ITokenProvider Tokens
+@inject NavigationManager Nav
 
+<div class="memorial-body d-flex flex-column min-vh-100">
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
+  <nav class="navbar navbar-expand-lg navbar-light bg-white memorial-navbar border-bottom">
+    <div class="container">
+      <a class="navbar-brand fw-semibold text-accent" href="/">Memorial</a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+
+          <!-- Home link -->
+          <li class="nav-item">
+            <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">Home</NavLink>
+          </li>
+
+          <!-- Create link (Only when logged in) -->
+          @if (_hasToken)
+          {
+            <li class="nav-item">
+              <NavLink class="nav-link" href="/obituaries/create">Create</NavLink>
+            </li>
+          }
+
+          <!-- Logout link (Only when logged in) -->
+          @if (_hasToken)
+          {
+            <li class="nav-item">
+              <a class="nav-link" href="#" @onclick="Logout">Logout</a>
+            </li>
+          }
+          else
+          {
+            <!-- Login link (Only when logged out) -->
+            <li class="nav-item">
+              <NavLink class="nav-link" href="/login">Login</NavLink>
+            </li>
+          }
+        </ul>
+      </div>
     </div>
+  </nav>
 
-    <main>
-        <div class="top-row px-4 d-flex justify-content-end align-items-center" style="background-color:#f5f5f5; padding:10px;">
-            @if (IsLoggedIn)
-            {
-                <button class="btn btn-link login-link" @onclick="Logout">Logout</button>
-            }
-            else
-            {
-                <a href="login" class="login-link">Login</a>
-            }
-        </div>
-        
+  <!-- Main content area -->
+  <main class="flex-grow-1 memorial-main py-4">
+    <div class="container">
+      @Body
+    </div>
+  </main>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
+  <!-- Footer -->
+  <footer class="memorial-footer border-top py-4">
+    <div class="container text-center">
+      <p class="text-muted small mb-0">
+        &copy; @(DateTime.Now.Year) Memorial App · <a class="link-muted" href="/">Home</a>
+      </p>
+    </div>
+  </footer>
 </div>
 
-<style>
-    .login-link {
-        color: #007bff;
-        text-decoration: none;
-        font-weight: 500;
-    }
-
-    .login-link:hover {
-        text-decoration: underline;
-    }
-
-    .top-row {
-        border-bottom: 1px solid #ddd;
-    }
-</style>
-
 @code {
-    private bool IsLoggedIn;
 
-    protected override void OnInitialized()
-    {
-        // Subscribe to AuthState changes
-        Auth.OnChange += OnAuthStateChanged;
-        IsLoggedIn = Auth.IsLoggedIn;
-    }
+  private bool _hasToken;
 
-    private void OnAuthStateChanged()
-    {
-        IsLoggedIn = Auth.IsLoggedIn;
-        InvokeAsync(StateHasChanged); // <— Force UI re-render on state change
-    }
+  /*
+    Check if a token exists to determine login state.
+    Also, listen for navigation changes to update login state accordingly.
+  */
+  protected override async Task OnInitializedAsync()
+  {
+    _hasToken = !string.IsNullOrWhiteSpace(await Tokens.GetTokenAsync());
 
-    private async Task Logout()
+    Nav.LocationChanged += async (_, __) =>
     {
-        await JS.InvokeVoidAsync("localStorage.removeItem", "accessToken");
-        Auth.IsLoggedIn = false;
-        Navigation.NavigateTo("/");
-    }
+      _hasToken = !string.IsNullOrWhiteSpace(await Tokens.GetTokenAsync());
+      StateHasChanged();
+    };
+  }
 
-    public void Dispose()
-    {
-        Auth.OnChange -= OnAuthStateChanged;
-    }
+  /*
+    Logout by removing the token and navigating to home.
+  */
+  private async Task Logout()
+  {
+    await Tokens.RemoveTokenAsync();
+    _hasToken = false;
+    Nav.NavigateTo("/", forceLoad: false);
+  }
 }

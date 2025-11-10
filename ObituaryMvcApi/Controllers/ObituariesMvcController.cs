@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ObivtuaryMvcApi.Data;
-using ObivtuaryMvcApi.Models;
+using ObituaryMvcApi.Data;
+using ObituaryMvcApi.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
-namespace ObivtuaryMvcApi.Controllers;
+namespace ObituaryMvcApi.Controllers;
 
 [Authorize] // Any authenticated user can access these actions (Admins still have elevated rights)
 public class ObituariesMvcController : Controller

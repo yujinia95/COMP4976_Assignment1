@@ -1,0 +1,173 @@
+@page "/"
+@using ObituaryBlazorWasm.Models
+@inject ObituaryBlazorWasm.Services.ObituaryApiClient Api
+
+<PageTitle>Memorial Gallery</PageTitle>
+
+<div class="memorial-hero">
+  <div class="container hero-inner">
+    <h1 class="hero-title h3">Memorial Gallery</h1>
+    <p class="hero-subtitle">Cherishing the stories of loved ones</p>
+
+    <div class="memorial-search">
+      <div class="input-group memorial-search__group">
+        <button class="btn memorial-search__icon" type="button" aria-label="Search">
+          <i class="bi bi-search"></i>
+        </button>
+        <input class="form-control memorial-search__input"
+               placeholder="Search by name..."
+               @bind="SearchTerm" @bind:event="oninput" @bind:after="ApplyFilter" />
+        <button class="btn memorial-search__clear" type="button" @onclick="ClearSearch">
+          <i class="bi bi-x-circle"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container memorial-grid">
+  @if (IsLoading)
+  {
+    <div class="py-5 text-center text-muted">Loading memorials…</div>
+  }
+  else if (Filtered.Count == 0)
+  {
+    <div class="empty-state text-center">
+      <div class="empty-state__icon"><i class="bi bi-image"></i></div>
+      <h3 class="empty-state__title">No memorials found</h3>
+      <p class="empty-state__text">Try a different name or clear the search.</p>
+      <button class="btn btn-outline-secondary" @onclick="ClearSearch">Clear search</button>
+    </div>
+  }
+  else
+  {
+    <div class="row g-3">
+      @foreach (var o in VisiblePage)
+      {
+        <div class="col-12 col-sm-6 col-lg-4">
+          <div class="memorial-card" tabindex="0">
+            <div class="memorial-card__media">
+              @if (!string.IsNullOrEmpty(GetPhotoSrc(o)))
+              {
+                <img class="memorial-card__img" src="@GetPhotoSrc(o)" alt="@o.FullName" />
+              }
+              else
+              {
+                <div class="memorial-card__placeholder"><i class="bi bi-person"></i></div>
+              }
+            </div>
+            <div class="memorial-card__body">
+              <h3 class="memorial-card__title h5">@o.FullName</h3>
+              <p class="memorial-card__dates">
+                @o.DateOfBirth.ToString("yyyy-MM-dd") <span class="sep">—</span> @o.DateOfDeath.ToString("yyyy-MM-dd")
+              </p>
+              <p class="memorial-card__bio">@Truncate(o.Biography, 140)</p>
+            </div>
+            <div class="memorial-card__footer">
+              <a class="btn btn-outline-primary" href="@($"/obituaries/details/{o.Id}")">View</a>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (TotalPages > 1)
+    {
+      <div class="memorial-pagination">
+        <div class="memorial-pagination__info">
+          <small>Showing @((PageIndex - 1) * PageSize + 1)-@(Math.Min(PageIndex * PageSize, Filtered.Count)) of @Filtered.Count</small>
+        </div>
+        <nav>
+          <ul class="pagination mb-0">
+            <li class="page-item @(PageIndex == 1 ? "disabled" : null)">
+              <button class="page-link" @onclick="@(()=>GoTo(1))">« First</button>
+            </li>
+            <li class="page-item @(PageIndex == 1 ? "disabled" : null)">
+              <button class="page-link" @onclick="@(()=>GoTo(PageIndex-1))">‹ Prev</button>
+            </li>
+            <li class="page-item active"><span class="page-link">@PageIndex / @TotalPages</span></li>
+            <li class="page-item @(PageIndex == TotalPages ? "disabled" : null)">
+              <button class="page-link" @onclick="@(()=>GoTo(PageIndex+1))">Next ›</button>
+            </li>
+            <li class="page-item @(PageIndex == TotalPages ? "disabled" : null)">
+              <button class="page-link" @onclick="@(()=>GoTo(TotalPages))">Last »</button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    }
+  }
+</div>
+
+@code {
+  private List<Obituary> All { get; set; } = new();
+  private List<Obituary> Filtered { get; set; } = new();
+  private bool IsLoading { get; set; } = true;
+
+  private string? SearchTerm { get; set; } = string.Empty;
+
+  // Paging
+  private const int PageSize = 9;
+  private int PageIndex = 1;
+  private int TotalPages => Math.Max(1, (int)Math.Ceiling(Filtered.Count / (double)PageSize));
+  private IEnumerable<Obituary> VisiblePage => Filtered.Skip((PageIndex - 1) * PageSize).Take(PageSize);
+
+    /*
+        Load all obituaries on initialization
+    */
+  protected override async Task OnInitializedAsync()
+  {
+    IsLoading = true;
+    All = await Api.GetAllAsync();
+    ApplyFilter();
+    IsLoading = false;
+  }
+
+    /*
+        Apply search filter to obituaries
+    */
+  private void ApplyFilter()
+  {
+    var q = All.AsEnumerable();
+    if (!string.IsNullOrWhiteSpace(SearchTerm))
+    {
+      var term = SearchTerm.Trim();
+      q = q.Where(o => (o.FullName ?? string.Empty).Contains(term, StringComparison.OrdinalIgnoreCase));
+    }
+    Filtered = q.ToList();
+    PageIndex = 1;
+  }
+
+    /*
+    Clear search filter
+    */
+  private void ClearSearch()
+  {
+    SearchTerm = string.Empty;
+    ApplyFilter();
+  }
+
+    /*
+    Navigate to a specific page
+    */
+  private void GoTo(int page) => PageIndex = Math.Clamp(page, 1, TotalPages);
+
+    /*
+    Truncate text to max length with ellipsis
+    */
+  private static string Truncate(string? text, int max)
+    => string.IsNullOrEmpty(text) ? string.Empty : (text.Length <= max ? text : text[..max].TrimEnd() + "…");
+
+    /*
+    Get photo data URL for obituary
+    */
+  private static string? GetPhotoSrc(Obituary o)
+  {
+    if (o.Photo is { Length: > 0 })
+    {
+      var base64 = Convert.ToBase64String(o.Photo);
+      return $"data:image/jpeg;base64,{base64}";
+    }
+    return null;
+  }
+}

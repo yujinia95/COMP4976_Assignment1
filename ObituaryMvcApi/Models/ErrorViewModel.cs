@@ -1,4 +1,4 @@
-namespace ObivtuaryMvcApi.Models;
+namespace ObituaryMvcApi.Models;
 
 public class ErrorViewModel
 {

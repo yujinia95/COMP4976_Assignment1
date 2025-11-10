@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using ObivtuaryMvcApi.Data;
+using ObituaryMvcApi.Data;
 
 #nullable disable
 
@@ -227,7 +227,7 @@ namespace ObituaryMvcApi.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("ObivtuaryMvcApi.Models.Obituary", b =>
+            modelBuilder.Entity("ObituaryMvcApi.Models.Obituary", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()

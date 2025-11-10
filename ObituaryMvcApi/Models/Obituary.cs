@@ -1,6 +1,6 @@
 using System;
 
-namespace ObivtuaryMvcApi.Models;
+namespace ObituaryMvcApi.Models;
 
 public class Obituary
 {

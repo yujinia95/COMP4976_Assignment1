@@ -1,0 +1,246 @@
+@page "/obituaries/edit/{id:int}"
+@using Microsoft.AspNetCore.Components.Forms
+@using ObituaryBlazorWasm.Models
+@inject ObituaryBlazorWasm.Services.ObituaryApiClient Api
+@inject NavigationManager Nav
+
+<PageTitle>Edit Memorial</PageTitle>
+
+@if (IsLoading)
+{
+  <div class="container py-5 text-center text-muted">Loading…</div>
+}
+else if (Entity is null)
+{
+  <div class="container py-5 text-center text-muted">Memorial not found.</div>
+}
+else
+{
+  <div class="memorial-hero--sub">
+    <div class="container hero-inner">
+      <i class="bi bi-journal-check"></i>
+      <h1 class="hero-title h3">Edit Memorial</h1>
+      <p class="hero-subtitle">Update details and photo.</p>
+    </div>
+  </div>
+
+  <div class="container my-4">
+    <div class="row g-4">
+      <div class="col-12 col-lg-8">
+        <div class="card memorial-form-card">
+          <div class="card-body">
+
+            <!-- keep ids/classes for MVC JS parity -->
+            <EditForm id="editForm" EditContext="_ctx" OnValidSubmit="HandleSubmit" class="memorial-form needs-validation">
+              <DataAnnotationsValidator />
+              <div class="alert alert-danger d-none" role="alert">Please fix the highlighted errors.</div>
+
+              <!-- Name -->
+              <div class="mb-3">
+                <label class="form-label" for="nameInput">Full name <span class="req">*</span></label>
+                <InputText id="nameInput" class="form-control" @bind-Value="Entity.FullName" />
+                <ValidationMessage For="() => Entity.FullName" />
+              </div>
+
+              <!-- Dates -->
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label" for="dobInput">Date of birth <span class="req">*</span></label>
+                  <InputDate id="dobInput" class="form-control" @bind-Value="Entity.DateOfBirth" />
+                  <ValidationMessage For="() => Entity.DateOfBirth" />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label" for="dodInput">Date of death <span class="req">*</span></label>
+                  <InputDate id="dodInput" class="form-control" @bind-Value="Entity.DateOfDeath" />
+                  <ValidationMessage For="() => Entity.DateOfDeath" />
+                </div>
+              </div>
+
+              <!-- Biography -->
+              <div class="mb-3">
+                <label class="form-label" for="bioInput">Biography <span class="req">*</span></label>
+                <InputTextArea id="bioInput"
+                               class="form-control"
+                               rows="6"
+                               maxlength="5000"
+                               @bind-Value="Entity.Biography"
+                               @oninput="e => BioCount = (((ChangeEventArgs)e).Value?.ToString() ?? string.Empty).Length" />
+                <div id="bioCounter" class="form-text">@BioCount / 5000</div>
+                <ValidationMessage For="() => Entity.Biography" />
+              </div>
+
+              <!-- Existing photo (if any) -->
+              @if (ExistingPhotoUrl is not null)
+              {
+                <div class="mb-2">
+                  <img class="photo-preview existing-photo" src="@ExistingPhotoUrl" alt="Current photo" />
+                </div>
+                <div class="form-check mb-3">
+                  <input id="removePhoto" class="form-check-input" type="checkbox" @bind="RemoveExistingPhoto" />
+                  <label class="form-check-label" for="removePhoto">Remove current photo</label>
+                </div>
+              }
+
+              <!-- New photo (dropzone + file) -->
+              <div class="mb-3">
+                <label class="form-label">Replace photo</label>
+                <div id="photoDrop" class="photo-dropzone" tabindex="0">
+                  <div class="dz-inner">
+                    <i class="bi bi-image"></i>
+                    <div>
+                      <div>Drag & drop a photo here, or</div>
+                      <label for="photoInput" class="btn btn-sm btn-outline-secondary mt-1" style="cursor: pointer;">
+                        Choose file
+                      </label>
+                      <div id="photoInfo" class="small mt-1 text-muted">@_photoInfo</div>
+                    </div>
+                  </div>
+                </div>
+
+                <InputFile id="photoInput" class="d-none" OnChange="OnFileSelected" @ref="_fileInput" />
+                @if (!string.IsNullOrEmpty(PreviewUrl))
+                {
+                  <img class="photo-preview mt-3" src="@PreviewUrl" alt="Preview" />
+                }
+                <div class="mt-2">
+                  <button type="button" id="clearPhoto" class="btn btn-sm btn-outline-secondary @(string.IsNullOrEmpty(PreviewUrl) ? "d-none" : "")"
+                          @onclick="ClearPhoto">Clear</button>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="d-flex gap-2">
+                <button id="saveBtn" type="submit" class="btn btn-primary">
+                  <span class="default">Save changes</span>
+                  <span class="busy d-none">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Saving…
+                  </span>
+                </button>
+                <a class="btn btn-outline-secondary" href="/obituaries">Cancel</a>
+              </div>
+            </EditForm>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-4">
+        <div class="p-3 memorial-side">
+          <h6 class="mb-3">Editing Info</h6>
+          <ul class="v-list ps-0">
+            <li><i class="bi bi-shield-check"></i> Accurate dates: no future values.</li>
+            <li><i class="bi bi-card-image"></i> New image up to 5 MB (JPG/PNG/WEBP/GIF).</li>
+            <li><i class="bi bi-exclamation-circle"></i> “Remove current photo” deletes the existing image when you save.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@code {
+  [Parameter] public int Id { get; set; }
+
+  private Obituary? Entity;
+  private bool IsLoading = true;
+
+  private EditContext? _ctx;
+  private int BioCount;
+  private IBrowserFile? NewPhotoFile;
+  private string? PreviewUrl;
+  private string? ExistingPhotoUrl;
+  private bool RemoveExistingPhoto;
+  private InputFile? _fileInput;
+  private string _photoInfo = "";
+
+  protected override async Task OnInitializedAsync()
+  {
+    Entity = await Api.GetAsync(Id);
+    if (Entity is not null)
+    {
+      _ctx = new EditContext(Entity);
+      _ctx.OnValidationRequested += (_, __) => ValidateDates();
+
+      // Pre-populate counters and existing image preview (from byte[])
+      BioCount = (Entity.Biography ?? string.Empty).Length;
+
+      if (Entity.Photo is { Length: > 0 })
+      {
+        var base64 = Convert.ToBase64String(Entity.Photo);
+        ExistingPhotoUrl = $"data:image/jpeg;base64,{base64}";
+      }
+    }
+    IsLoading = false;
+  }
+
+  private void ValidateDates()
+  {
+    if (_ctx is null || Entity is null) return;
+
+    var store = new ValidationMessageStore(_ctx);
+    store.Clear();
+
+    // same client rules as Create
+    if (Entity.DateOfBirth.Date > DateTime.Today)
+      store.Add(() => Entity.DateOfBirth, "Date of birth cannot be in the future.");
+
+    if (Entity.DateOfDeath.Date > DateTime.Today)
+      store.Add(() => Entity.DateOfDeath, "Date of death cannot be in the future.");
+
+    if (Entity.DateOfDeath < Entity.DateOfBirth)
+      store.Add(() => Entity.DateOfDeath, "Date of death must be on or after date of birth.");
+
+    _ctx.NotifyValidationStateChanged();
+  }
+
+  private async Task OnFileSelected(InputFileChangeEventArgs e)
+  {
+    NewPhotoFile = e.File;
+
+    if (NewPhotoFile is null)
+    {
+      PreviewUrl = null;
+      _photoInfo = "";
+      return;
+    }
+
+    using var s = NewPhotoFile.OpenReadStream(5 * 1024 * 1024);
+    using var ms = new MemoryStream();
+    await s.CopyToAsync(ms);
+
+    var base64 = Convert.ToBase64String(ms.ToArray());
+    PreviewUrl = $"data:{NewPhotoFile.ContentType};base64,{base64}";
+    _photoInfo = $"{NewPhotoFile.Name} — {(NewPhotoFile.Size / (1024.0 * 1024.0)):0.00} MB";
+
+    // if selecting a new photo, uncheck “remove existing”
+    RemoveExistingPhoto = false;
+  }
+
+  private void ClearPhoto()
+  {
+    NewPhotoFile = null;
+    PreviewUrl = null;
+    _photoInfo = "";
+  }
+
+  private async Task HandleSubmit()
+  {
+    if (_ctx is null || Entity is null) return;
+
+    ValidateDates();
+    if (!_ctx.Validate()) return;
+
+    // Convention for “remove existing photo” when no new file is uploaded:
+    // Set Photo to empty byte[] so server can treat it as “remove”.
+    // (If your server expects null instead, change to: Entity.Photo = null)
+    if (RemoveExistingPhoto && NewPhotoFile is null)
+    {
+      Entity.Photo = Array.Empty<byte>();
+    }
+
+    var (ok, error) = await Api.UpdateAsync(Id, Entity, NewPhotoFile);
+    if (ok) Nav.NavigateTo("/obituaries");
+    else Console.Error.WriteLine(error);
+  }
+}

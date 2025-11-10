@@ -4,7 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>aspnet-ObivtuaryMvcApi-26cde760-0561-464b-9d76-37a07cfd760f</UserSecretsId>
+  <UserSecretsId>aspnet-ObituaryMvcApi-26cde760-0561-464b-9d76-37a07cfd760f</UserSecretsId>
   </PropertyGroup>
 
   <!-- <ItemGroup>
@@ -35,6 +35,8 @@
     <PrivateAssets>all</PrivateAssets>
   </PackageReference>
   <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
+  <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.8" />
+  <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
 
   <!-- Identity and Diagnostics -->
   <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="9.0.3" />

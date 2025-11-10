@@ -1,6 +1,6 @@
 @* This view displays the details of a specific obituary. *@
 
-@model ObivtuaryMvcApi.Models.Obituary
+@model ObituaryMvcApi.Models.Obituary
 @{
     ViewData["Title"] = $"Memorial – {Model.FullName}";
     var age = Model.DateOfDeath.Year - Model.DateOfBirth.Year;

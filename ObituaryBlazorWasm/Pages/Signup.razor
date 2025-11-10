@@ -1,0 +1,70 @@
+@page "/signup"
+@inject ObituaryBlazorWasm.Services.AuthApiClient Auth
+@inject NavigationManager Nav
+
+<div class="auth-wrap">
+  <div class="auth-card">
+    <h2 class="auth-title">Create account</h2>
+    <p class="auth-muted mb-4">It only takes a minute.</p>
+
+    @if (!string.IsNullOrEmpty(_error))
+    {
+      <div class="alert alert-danger">@_error</div>
+    }
+    @if (!string.IsNullOrEmpty(_success))
+    {
+      <div class="alert alert-success">@_success</div>
+    }
+
+    <EditForm Model="_m" OnValidSubmit="HandleSignup">
+      <DataAnnotationsValidator />
+      <div class="mb-3">
+        <label class="form-label">Username</label>
+        <InputText class="form-control" @bind-Value="_m.Username" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <InputText class="form-control" @bind-Value="_m.Email" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <InputText class="form-control" type="password" @bind-Value="_m.Password" />
+      </div>
+      <button class="btn auth-btn w-100" disabled="@_busy" type="submit">
+        @(_busy ? "Creating..." : "Sign Up")
+      </button>
+    </EditForm>
+
+    <p class="mt-3 mb-0 auth-muted">
+      Already have an account?
+      <a class="auth-link" href="/login">Sign in</a>
+    </p>
+  </div>
+</div>
+
+@code {
+  private class SignupModel { public string Username { get; set; } = ""; public string Email { get; set; } = ""; public string Password { get; set; } = ""; }
+  private readonly SignupModel _m = new();
+  private bool _busy;
+  private string? _error;
+  private string? _success;
+
+  /*
+    Handle user signup
+  */
+  private async Task HandleSignup()
+  {
+    _busy = true; _error = null; _success = null;
+    var model = new ObituaryBlazorWasm.Models.Auth.SignupModel { Username = _m.Username, Email = _m.Email, Password = _m.Password };
+    var (ok, err) = await Auth.SignupAsync(model);
+    _busy = false;
+
+    if (!ok)
+    {
+      _error = string.IsNullOrWhiteSpace(err) ? "Sign up failed." : err;
+      return;
+    }
+
+    _success = "Account created! You can now sign in.";
+  }
+}

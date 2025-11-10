@@ -1,0 +1,178 @@
+@page "/obituaries/delete/{id:int}"
+@using ObituaryBlazorWasm.Models
+@using System.IdentityModel.Tokens.Jwt
+@using System.Security.Claims
+@inject ObituaryBlazorWasm.Services.ObituaryApiClient Api
+@inject ObituaryBlazorWasm.Services.ITokenProvider TokenProvider
+@inject NavigationManager Nav
+
+<PageTitle>Delete Memorial</PageTitle>
+
+@if (IsLoading)
+{
+  <div class="container py-5 text-center text-muted">Loading…</div>
+}
+else if (!IsAuthorized)
+{
+  <div class="container py-5 text-center">
+    <div class="alert alert-danger">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+      <strong>Unauthorized</strong>
+      <p>You don't have permission to delete this memorial.</p>
+      <a class="btn btn-outline-secondary mt-2" href="/obituaries">Back to Gallery</a>
+    </div>
+  </div>
+}
+else if (Entity is null)
+{
+  <div class="container py-5 text-center text-muted">Memorial not found.</div>
+}
+else
+{
+  <div class="memorial-hero--sub">
+    <div class="container hero-inner">
+      <i class="bi bi-exclamation-octagon"></i>
+      <h1 class="hero-title h3">Delete Memorial</h1>
+      <p class="hero-subtitle">This action cannot be undone.</p>
+    </div>
+  </div>
+
+  <div class="container my-4">
+    <div class="row g-4">
+      <div class="col-12 col-lg-8">
+        <div class="card memorial-form-card">
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-12 col-md-5">
+                <div class="memorial-photo">
+                  @if (!string.IsNullOrEmpty(PhotoUrl))
+                  {
+                    <img class="img-fluid rounded" src="@PhotoUrl" alt="@Entity.FullName" />
+                  }
+                  else
+                  {
+                    <div class="photo-placeholder">
+                      <i class="bi bi-person"></i>
+                    </div>
+                  }
+                </div>
+              </div>
+              <div class="col-12 col-md-7">
+                <h2 class="memorial-name h4 mb-1">@Entity.FullName</h2>
+                <p class="memorial-dates">
+                  @Entity.DateOfBirth.ToString("yyyy-MM-dd") <span class="sep">—</span> @Entity.DateOfDeath.ToString("yyyy-MM-dd")
+                </p>
+                <div class="memorial-bio">
+                  <p class="mb-0">@Snippet(Entity.Biography, 240)</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="alert alert-danger d-flex align-items-start gap-2 mt-4" role="alert">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+              <div>
+                <strong>Are you sure?</strong> Deleting <em>@Entity.FullName</em> will permanently remove this memorial and its photo.
+              </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Error))
+            {
+              <div class="alert alert-warning mt-3" role="alert">@Error</div>
+            }
+
+            <div class="d-flex gap-2 mt-3">
+              <button class="btn btn-danger" disabled="@IsDeleting" @onclick="ConfirmDelete">
+                @if (IsDeleting)
+                {
+                  <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                }
+                Delete
+              </button>
+              <a class="btn btn-outline-secondary" href="/obituaries">Cancel</a>
+            </div>
+          </div>
+
+          <div class="card-footer text-end">
+            <small class="text-muted">Created @Entity.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@code {
+  [Parameter] public int Id { get; set; }
+
+  private Obituary? Entity;
+  private bool IsLoading = true;
+  private bool IsDeleting = false;
+  private bool IsAuthorized = false;
+  private string? PhotoUrl;
+  private string? Error;
+  private string? CurrentUserId;
+  private bool IsAdmin = false;
+
+  protected override async Task OnInitializedAsync()
+  {
+    Entity = await Api.GetAsync(Id);
+    if (Entity?.Photo is { Length: > 0 })
+    {
+      var base64 = Convert.ToBase64String(Entity.Photo);
+      PhotoUrl = $"data:image/jpeg;base64,{base64}";
+    }
+
+    // Check authorization
+    await LoadUserInfoFromToken();
+    if (Entity != null)
+    {
+      IsAuthorized = IsAdmin || Entity.CreatedByUserId == CurrentUserId;
+    }
+
+    IsLoading = false;
+  }
+
+  private async Task LoadUserInfoFromToken()
+  {
+    var token = await TokenProvider.GetTokenAsync();
+    if (string.IsNullOrEmpty(token))
+      return;
+
+    try
+    {
+      var handler = new JwtSecurityTokenHandler();
+      var jwtToken = handler.ReadJwtToken(token);
+
+      // Get user ID from NameIdentifier claim
+      CurrentUserId = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+      // Get role from Role claim
+      var role = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+      IsAdmin = role == "Admin";
+    }
+    catch (Exception ex)
+    {
+      Console.Error.WriteLine($"Error decoding token: {ex.Message}");
+    }
+  }
+
+  private async Task ConfirmDelete()
+  {
+    if (Entity is null) return;
+    IsDeleting = true;
+    Error = null;
+
+    var (ok, error) = await Api.DeleteAsync(Entity.Id);
+    IsDeleting = false;
+
+    if (ok) Nav.NavigateTo("/obituaries");
+    else Error = string.IsNullOrWhiteSpace(error) ? "Delete failed." : error;
+  }
+
+  private static string Snippet(string? text, int max)
+  {
+    if (string.IsNullOrWhiteSpace(text)) return "No biography available.";
+    var t = text.Trim();
+    return t.Length <= max ? t : t[..max].TrimEnd() + "…";
+  }
+}

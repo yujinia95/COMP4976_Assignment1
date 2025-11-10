@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace ObivtuaryMvcApi.Data;
+namespace ObituaryMvcApi.Data;
 
 public class ApplicationDbContext : IdentityDbContext
 {
@@ -10,5 +10,5 @@ public class ApplicationDbContext : IdentityDbContext
     {
     }
 
-    public DbSet<ObivtuaryMvcApi.Models.Obituary> Obituaries { get; set; } = default!;
+    public DbSet<ObituaryMvcApi.Models.Obituary> Obituaries { get; set; } = default!;
 }

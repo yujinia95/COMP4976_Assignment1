@@ -1,0 +1,108 @@
+/* Scoped tokens */
+.memorial {
+  --ink: #1f2530;
+  --muted: #6c7683;
+  --veil: #f6f8fb;
+  --card: #ffffff;
+  --line: #e6ebf1;
+  --accent: #6fa7e8;
+  --focus: #0d6efd;
+  --shadow: 0 10px 28px rgba(20, 27, 44, .08);
+  --radius: 16px;
+}
+
+/* Hero */
+.memorial .memorial-hero--sub {
+  background: linear-gradient(180deg, #f5f7fb 0%, #fff 100%);
+  border-bottom: 1px solid var(--line);
+  padding: 2rem 0;
+}
+.memorial .memorial-hero--sub .hero-inner { text-align: center; padding: 36px 0 22px; }
+.memorial .memorial-hero--sub .bi-journal-heart { font-size: 40px; color: var(--accent); display: block; margin-bottom: 6px; }
+.memorial .hero-title { color: var(--ink); font-weight: 700; margin: 0 0 6px; font-size: 1.75rem; }
+.memorial .hero-subtitle { color: var(--muted); margin: 0; font-size: 1rem; }
+
+/* Card */
+.memorial .memorial-form-card {
+  border: 2px solid #dee2e6;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  background-color: var(--card);
+}
+.memorial .memorial-form-card .card-body { padding: 2rem; }
+
+.memorial .req { color: #d14b4b; font-weight: 700; }
+
+/* Inputs */
+.memorial .form-label { font-weight: 600; color: var(--ink); margin-bottom: 0.5rem; display: block; }
+
+.memorial .form-control {
+  border: 2px solid #ced4da;
+  border-radius: 8px;
+  padding: 0.75rem;
+  background-color: #ffffff;
+  transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+.memorial .form-control:focus {
+  box-shadow: 0 0 0 0.25rem rgba(13,110,253,.15);
+  border-color: var(--focus);
+  outline: none;
+}
+.memorial textarea.form-control { min-height: 120px; }
+.memorial .form-text { color: var(--muted); font-size: 0.875rem; margin-top: 0.25rem; }
+.memorial #bioCounter { font-variant-numeric: tabular-nums; }
+
+/* Side panel */
+.memorial .memorial-side {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  background-color: var(--card);
+  padding: 1.5rem;
+}
+.memorial .memorial-side h6 { color: var(--ink); font-weight: 600; margin-bottom: 1rem; }
+.memorial .v-list { list-style: none; padding-left: 0; margin: 0; }
+.memorial .v-list li { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 10px; color: var(--ink); }
+memorial .v-list i { margin-top: 2px; color: var(--accent); }
+
+/* Dropzone & preview */
+.memorial .photo-dropzone {
+  border: 2px dashed #cfd8e3;
+  border-radius: 14px;
+  background: #fbfcfe;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  transition: background .2s ease, border-color .2s ease;
+  outline: none;
+  cursor: pointer;
+  position: relative;
+}
+.memorial .photo-dropzone:focus { border-color: var(--focus); }
+.memorial .photo-dropzone .dz-inner { display: flex; gap: 12px; align-items: center; color: var(--muted); text-align: center; }
+.memorial .photo-dropzone .bi-image { font-size: 28px; color: var(--accent); }
+.memorial .photo-preview {
+  max-height: 220px;
+  max-width: 100%;
+  border-radius: 10px;
+  display: block;
+  box-shadow: var(--shadow);
+  margin: 0 auto;
+}
+
+/* Buttons (scoped) */
+.memorial .btn-primary {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  padding: 0.625rem 1.25rem;
+  font-weight: 500;
+}
+memorial .btn-primary:hover { background-color: #5f97d7; border-color: #5f97d7; }
+.memorial .btn-outline-secondary { color: var(--muted); border-color: var(--line); }
+.memorial .btn-outline-secondary:hover { background-color: var(--veil); color: var(--ink); border-color: var(--line); }
+
+/* Validation & spacing */
+.memorial .mb-3 { margin-bottom: 1.5rem; }
+.memorial .validation-message { color: #dc3545; font-size: 0.875rem; margin-top: 0.25rem; }

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ObivtuaryMvcApi.Models;
+namespace ObituaryMvcApi.Models;
 
 public class ObituaryCreateViewModel : IValidatableObject
 {

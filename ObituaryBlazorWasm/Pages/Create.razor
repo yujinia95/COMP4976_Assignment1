@@ -1,0 +1,257 @@
+@page "/obituaries/create"
+@using Microsoft.AspNetCore.Components.Forms
+@using ObituaryBlazorWasm.Models
+@inject ObituaryBlazorWasm.Services.ObituaryApiClient Api
+@inject NavigationManager Nav
+
+<PageTitle>Create Memorial</PageTitle>
+
+<div class="memorial">
+
+  <!-- Hero -->
+  <div class="memorial-hero--sub">
+    <div class="container hero-inner">
+      <i class="bi bi-journal-heart" aria-hidden="true"></i>
+      <h1 class="hero-title h3">Create a Memorial</h1>
+      <p class="hero-subtitle">Add a photo and share a short biography.</p>
+    </div>
+  </div>
+
+  <div class="container my-4">
+    <div class="row g-4">
+      <!-- Main form -->
+      <div class="col-12 col-lg-8">
+        <div class="card memorial-form-card">
+          <div class="card-body">
+
+            @if (!string.IsNullOrWhiteSpace(_error))
+            {
+              <div class="alert alert-danger" role="alert">@_error</div>
+            }
+
+            <EditForm EditContext="_ctx" OnValidSubmit="HandleSubmit" class="memorial-form">
+              <DataAnnotationsValidator />
+              <ValidationSummary />
+
+              <div class="mb-3">
+                <label class="form-label" for="fullName">Full name <span class="req">*</span></label>
+                <InputText id="fullName" class="form-control" @bind-Value="_model.FullName" />
+                <ValidationMessage For="@(()=> _model.FullName)" />
+              </div>
+
+              <div class="row g-3">
+                <div class="col-12 col-md-6">
+                  <label class="form-label" for="dob">Date of birth <span class="req">*</span></label>
+                  <InputDate id="dob" class="form-control" @bind-Value="_model.DateOfBirth" />
+                  <ValidationMessage For="@(()=> _model.DateOfBirth)" />
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label" for="dod">Date of death <span class="req">*</span></label>
+                  <InputDate id="dod" class="form-control" @bind-Value="_model.DateOfDeath" />
+                  <ValidationMessage For="@(()=> _model.DateOfDeath)" />
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label" for="bio">Biography <span class="req">*</span></label>
+                <!-- Proxy property + bind:event for live count; avoids duplicate oninput error -->
+                <InputTextArea id="bio"
+                               class="form-control"
+                               @bind-Value="BiographyText"
+                               @bind-Value:event="oninput"
+                               rows="6" />
+                <div class="form-text">
+                  <span id="bioCounter">@_bioCount</span>/<span>@_bioMax</span> characters
+                </div>
+                <ValidationMessage For="@(()=> _model.Biography)" />
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Photo (optional)</label>
+                <div class="photo-dropzone" tabindex="0">
+                  <div class="dz-inner">
+                    <i class="bi bi-image" aria-hidden="true"></i>
+                    <div>
+                      <div>Drag & drop an image here, or click to choose</div>
+                      <small class="text-muted">PNG/JPG up to 4 MB</small>
+                    </div>
+                  </div>
+                  <InputFile OnChange="OnPhotoSelected" class="visually-hidden" />
+                </div>
+                @if (!string.IsNullOrEmpty(_photoName))
+                {
+                  <div class="form-text">Selected: @_photoName</div>
+                }
+                @if (!string.IsNullOrEmpty(_photoError))
+                {
+                  <div class="validation-message">@_photoError</div>
+                }
+                @if (!string.IsNullOrEmpty(_previewDataUrl))
+                {
+                  <div class="mt-3">
+                    <img class="photo-preview" src="@_previewDataUrl" alt="Selected photo preview" />
+                  </div>
+                }
+              </div>
+
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary" disabled="@_busy">
+                  <span class="@(_busy ? "" : "d-none")" aria-hidden="true">⌛</span>
+                  <span>@(_busy ? "Saving..." : "Create")</span>
+                </button>
+                <button type="button" class="btn btn-outline-secondary" @onclick="Cancel" disabled="@_busy">
+                  Cancel
+                </button>
+              </div>
+            </EditForm>
+          </div>
+        </div>
+      </div>
+
+      <!-- Side panel -->
+      <div class="col-12 col-lg-4">
+        <aside class="memorial-side">
+          <h6>Tips</h6>
+          <ul class="v-list">
+            <li><i class="bi bi-check2-circle" aria-hidden="true"></i><span>Biography works best between 100–800 characters.</span></li>
+            <li><i class="bi bi-check2-circle" aria-hidden="true"></i><span>Use exact dates if you know them.</span></li>
+            <li><i class="bi bi-check2-circle" aria-hidden="true"></i><span>Clear, centered photos look nicest.</span></li>
+          </ul>
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
+
+@code {
+  private readonly int _bioMax = 800;
+  private EditContext? _ctx;
+  private Obituary _model = new();
+  private bool _busy;
+  private string? _error;
+
+  private string? _photoName;
+  private string? _photoError;
+  private string? _previewDataUrl;
+
+  private int _bioCount;
+
+  private string BiographyText
+  {
+    get => _model.Biography ?? string.Empty;
+    set
+    {
+      _model.Biography = value;
+      _bioCount = string.IsNullOrEmpty(_model.Biography) ? 0 : _model.Biography.Length;
+      _ctx?.NotifyValidationStateChanged();
+    }
+  }
+
+  protected override void OnInitialized()
+  {
+    _ctx = new EditContext(_model);
+    _ctx.OnValidationRequested += (_, __) => ValidateDates();
+    _bioCount = 0;
+  }
+
+  private void ValidateDates()
+  {
+    if (_ctx is null) return;
+
+    var store = new ValidationMessageStore(_ctx);
+    store.Clear();
+
+    if (_model.DateOfBirth == default)
+      store.Add(() => _model.DateOfBirth, "Date of birth is required.");
+
+    if (_model.DateOfDeath == default)
+      store.Add(() => _model.DateOfDeath, "Date of death is required.");
+
+    if (_model.DateOfBirth != default && _model.DateOfDeath != default &&
+        _model.DateOfBirth > _model.DateOfDeath)
+    {
+      store.Add(() => _model.DateOfDeath, "Date of death cannot be before date of birth.");
+    }
+
+    if (!string.IsNullOrEmpty(_model.Biography) && _model.Biography.Length > _bioMax)
+      store.Add(() => _model.Biography, $"Biography must be ≤ {_bioMax} characters.");
+
+    _ctx.NotifyValidationStateChanged();
+  }
+
+  private async Task OnPhotoSelected(InputFileChangeEventArgs e)
+  {
+    _photoError = null;
+    _photoName = null;
+    _previewDataUrl = null;
+
+    var file = e.File;
+    if (file is null) return;
+
+    if (file.ContentType is not ("image/png" or "image/jpeg" or "image/jpg"))
+    {
+      _photoError = "Only PNG or JPG images are allowed.";
+      return;
+    }
+
+    const long max = 4 * 1024 * 1024; // 4 MB
+    if (file.Size > max)
+    {
+      _photoError = "File too large (max 4 MB).";
+      return;
+    }
+
+    try
+    {
+      _photoName = file.Name;
+
+      using var ms = new MemoryStream();
+      await file.OpenReadStream(max).CopyToAsync(ms);
+      _model.Photo = ms.ToArray();
+
+      // Preview
+      var base64 = Convert.ToBase64String(_model.Photo);
+      var mime = file.ContentType.StartsWith("image/") ? file.ContentType : "image/jpeg";
+      _previewDataUrl = $"data:{mime};base64,{base64}";
+    }
+    catch (Exception ex)
+    {
+      _photoError = $"Could not read file: {ex.Message}";
+      _model.Photo = null;
+    }
+  }
+
+  private async Task HandleSubmit()
+  {
+    _error = null;
+    _busy = true;
+
+    try
+    {
+      _model.CreatedAt = DateTime.UtcNow;
+      _model.UpdatedAt = DateTime.UtcNow;
+
+      var (ok, err, created) = await Api.CreateAsync(_model);
+      if (!ok)
+      {
+        _error = string.IsNullOrWhiteSpace(err) ? "Failed to create memorial." : err;
+        return;
+      }
+
+      if (created?.Id > 0)
+        Nav.NavigateTo($"/obituaries/details/{created.Id}");
+      else
+        Nav.NavigateTo("/");
+    }
+    catch (Exception ex)
+    {
+      _error = ex.Message;
+    }
+    finally
+    {
+      _busy = false;
+    }
+  }
+
+  private void Cancel() => Nav.NavigateTo("/memorials");
+}
