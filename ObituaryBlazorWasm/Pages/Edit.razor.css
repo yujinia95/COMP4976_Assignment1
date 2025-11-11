@@ -1,0 +1,136 @@
+/*
+  Memorial Edit Styles
+*/
+:root {
+  --ink: #1f2530;
+  --muted: #6c7683;
+  --veil: #f6f8fb;
+  --card: #ffffff;
+  --line: #e6ebf1;
+  --accent: #6fa7e8;
+  --focus: #0d6efd;
+  --shadow: 0 10px 28px rgba(20, 27, 44, .08);
+  --radius: 16px;
+}
+
+.memorial-hero--sub {
+  background: linear-gradient(180deg, #f5f7fb 0%, #fff 100%);
+  border-bottom: 1px solid var(--line);
+}
+
+.memorial-hero--sub .hero-inner {
+  text-align: center;
+  padding: 32px 0 18px;
+}
+
+.memorial-hero--sub {
+  font-size: 40px;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.hero-title {
+  color: var(--ink);
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+.hero-subtitle {
+  color: var(--muted);
+  margin: 0;
+}
+
+.memorial-form-card,
+.memorial-side {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.form-label {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.req {
+  color: #d14b4b;
+  font-weight: 700;
+}
+
+.form-control:focus {
+  box-shadow: none;
+  border-color: var(--focus);
+}
+
+.memorial-form .alert[role="alert"] {
+  margin-bottom: 18px;
+}
+
+.photo-dropzone {
+  border: 2px dashed #cfd8e3;
+  border-radius: 14px;
+  background: #fbfcfe;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  transition: background .2s ease, border-color .2s ease;
+  outline: none;
+}
+
+.photo-dropzone:focus {
+  border-color: var(--focus);
+}
+
+.photo-dropzone.dragover {
+  background: #f0f6ff;
+  border-color: #9cc2f3;
+}
+
+.photo-dropzone .dz-inner {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: var(--muted);
+}
+
+.photo-dropzone .dz-inner .bi-image {
+  font-size: 28px;
+}
+
+.photo-preview {
+  max-height: 220px;
+  border-radius: 10px;
+  display: block;
+  box-shadow: var(--shadow);
+}
+
+.v-list li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  color: var(--ink);
+}
+
+.v-list i {
+  margin-top: 2px;
+}
+
+button.btn .busy.d-none {
+  display: none;
+}
+
+button:focus,
+.btn:focus,
+.photo-dropzone:focus,
+.form-control:focus {
+  outline: 3px solid rgba(13, 110, 253, .35);
+  outline-offset: 2px;
+}
+
+.existing-photo+.d-flex.gap-2 {
+  margin-top: 6px;
+}

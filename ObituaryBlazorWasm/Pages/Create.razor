@@ -54,12 +54,10 @@
 
               <div class="mb-3">
                 <label class="form-label" for="bio">Biography <span class="req">*</span></label>
-                <!-- Proxy property + bind:event for live count; avoids duplicate oninput error -->
                 <InputTextArea id="bio"
                                class="form-control"
-                               @bind-Value="BiographyText"
-                               @bind-Value:event="oninput"
-                               rows="6" />
+                               @bind-Value="_model.Biography"
+                               rows="6"/>
                 <div class="form-text">
                   <span id="bioCounter">@_bioCount</span>/<span>@_bioMax</span> characters
                 </div>
@@ -68,19 +66,24 @@
 
               <div class="mb-3">
                 <label class="form-label">Photo (optional)</label>
-                <div class="photo-dropzone" tabindex="0">
+                <label for="photoInput" class="photo-dropzone" tabindex="0" style="cursor: pointer;">
                   <div class="dz-inner">
                     <i class="bi bi-image" aria-hidden="true"></i>
                     <div>
-                      <div>Drag & drop an image here, or click to choose</div>
-                      <small class="text-muted">PNG/JPG up to 4 MB</small>
+                      <div>Click to choose image</div>
+                      <small class="text-muted">PNG/JPG up to 4 MB (1 photo only)</small>
                     </div>
                   </div>
-                  <InputFile OnChange="OnPhotoSelected" class="visually-hidden" />
-                </div>
+                </label>
+                <InputFile id="photoInput" OnChange="OnPhotoSelected" class="visually-hidden" accept="image/png,image/jpeg,image/jpg" />
                 @if (!string.IsNullOrEmpty(_photoName))
                 {
-                  <div class="form-text">Selected: @_photoName</div>
+                  <div class="form-text d-flex align-items-center gap-2">
+                    <span>Selected: @_photoName</span>
+                    <button type="button" class="btn btn-sm btn-outline-danger" @onclick="RemovePhoto">
+                      <i class="bi bi-x-circle"></i> Remove
+                    </button>
+                  </div>
                 }
                 @if (!string.IsNullOrEmpty(_photoError))
                 {
@@ -88,8 +91,11 @@
                 }
                 @if (!string.IsNullOrEmpty(_previewDataUrl))
                 {
-                  <div class="mt-3">
+                  <div class="mt-3 position-relative" style="display: inline-block;">
                     <img class="photo-preview" src="@_previewDataUrl" alt="Selected photo preview" />
+                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2" @onclick="RemovePhoto" title="Remove photo">
+                      <i class="bi bi-x-lg"></i>
+                    </button>
                   </div>
                 }
               </div>
@@ -126,6 +132,7 @@
 @code {
   private readonly int _bioMax = 800;
   private EditContext? _ctx;
+  private ValidationMessageStore? _validationStore;
   private Obituary _model = new();
   private bool _busy;
   private string? _error;
@@ -136,47 +143,58 @@
 
   private int _bioCount;
 
-  private string BiographyText
-  {
-    get => _model.Biography ?? string.Empty;
-    set
-    {
-      _model.Biography = value;
-      _bioCount = string.IsNullOrEmpty(_model.Biography) ? 0 : _model.Biography.Length;
-      _ctx?.NotifyValidationStateChanged();
-    }
-  }
-
   protected override void OnInitialized()
   {
     _ctx = new EditContext(_model);
+    _validationStore = new ValidationMessageStore(_ctx);
     _ctx.OnValidationRequested += (_, __) => ValidateDates();
     _bioCount = 0;
+    _ctx.OnFieldChanged += (_, args) =>
+    {
+    if (args.FieldIdentifier.FieldName == nameof(_model.Biography))
+      _bioCount = _model.Biography?.Length ?? 0;
+
+    if (args.FieldIdentifier.FieldName is nameof(_model.DateOfBirth) or nameof(_model.DateOfDeath))
+      ValidateDates();
+    };
   }
 
-  private void ValidateDates()
-  {
-    if (_ctx is null) return;
+private void ValidateDates()
+{
+    if (_ctx is null || _validationStore is null) return;
 
-    var store = new ValidationMessageStore(_ctx);
-    store.Clear();
+    _validationStore.Clear();
+
+    bool hasErrors = false;
 
     if (_model.DateOfBirth == default)
-      store.Add(() => _model.DateOfBirth, "Date of birth is required.");
-
-    if (_model.DateOfDeath == default)
-      store.Add(() => _model.DateOfDeath, "Date of death is required.");
-
-    if (_model.DateOfBirth != default && _model.DateOfDeath != default &&
-        _model.DateOfBirth > _model.DateOfDeath)
     {
-      store.Add(() => _model.DateOfDeath, "Date of death cannot be before date of birth.");
+        _validationStore.Add(() => _model.DateOfBirth, "Date of birth is required.");
+        hasErrors = true;
     }
 
-    if (!string.IsNullOrEmpty(_model.Biography) && _model.Biography.Length > _bioMax)
-      store.Add(() => _model.Biography, $"Biography must be ≤ {_bioMax} characters.");
+    if (_model.DateOfDeath == default)
+    {
+        _validationStore.Add(() => _model.DateOfDeath, "Date of death is required.");
+        hasErrors = true;
+    }
 
-    _ctx.NotifyValidationStateChanged();
+    if (_model.DateOfBirth > _model.DateOfDeath && _model.DateOfDeath != default)
+    {
+        _validationStore.Add(() => _model.DateOfDeath, "Date of death cannot be before date of birth.");
+        hasErrors = true;
+    }
+
+    if (hasErrors)
+        _ctx.NotifyValidationStateChanged(); // only when necessary
+}
+
+  private void RemovePhoto()
+  {
+    _photoName = null;
+    _photoError = null;
+    _previewDataUrl = null;
+    _model.Photo = null;
   }
 
   private async Task OnPhotoSelected(InputFileChangeEventArgs e)

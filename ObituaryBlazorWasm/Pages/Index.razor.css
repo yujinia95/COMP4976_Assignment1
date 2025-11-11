@@ -1,0 +1,319 @@
+/* ======================================
+   Variables (Unified)
+====================================== */
+:root {
+  --ink: #1f2530;
+  --muted: #6c7683;
+  --veil: #f6f8fb;
+  --card: #ffffff;
+  --line: #e6ebf1;
+  --accent: #6fa7e8;
+  --accent-ink: #0d3a66;
+  --focus: #0d6efd;
+  --shadow: 0 10px 28px rgba(20, 27, 44, 0.08);
+  --radius: 16px;
+}
+
+/* ======================================
+   Navbar / Layout
+====================================== */
+.memorial-body {
+  background: #fff;
+  color: var(--ink);
+}
+
+.memorial-navbar {
+  box-shadow: 0 2px 12px rgba(17, 24, 39, 0.04);
+}
+
+.navbar-brand {
+  letter-spacing: 0.2px;
+}
+
+.text-accent {
+  color: var(--accent) !important;
+}
+
+.btn-accent {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--accent);
+  --bs-btn-border-color: var(--accent);
+  --bs-btn-hover-bg: #5f97d7;
+  --bs-btn-hover-border-color: #5f97d7;
+  --bs-btn-focus-shadow-rgb: 13, 110, 253;
+}
+
+.memorial-subhero {
+  background: linear-gradient(180deg, #f7f9fd 0%, #ffffff 100%);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.memorial-main {
+  min-height: calc(100vh - 180px);
+}
+
+.memorial-footer {
+  background: #fff;
+}
+
+.memorial-footer .link-muted {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.memorial-footer .link-muted:hover {
+  text-decoration: underline;
+}
+
+/* ======================================
+   Memorial Gallery Hero
+====================================== */
+.memorial-hero {
+  background: linear-gradient(180deg, #f6f8fb 0%, #ffffff 100%);
+  border-bottom: 1px solid var(--line);
+}
+
+.memorial-hero .hero-inner {
+  padding: 40px 0 28px;
+  text-align: center;
+}
+
+.memorial-hero .bi-flower1 {
+  font-size: 42px;
+  color: var(--accent);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.hero-title {
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.hero-subtitle {
+  color: var(--muted);
+  margin: 0;
+}
+
+/* ======================================
+   Search Bar
+====================================== */
+.memorial-search {
+  margin-top: 16px;
+}
+
+.memorial-search__group {
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--line);
+}
+
+.memorial-search__icon {
+  background: transparent;
+  border: none;
+  padding-left: 18px;
+  color: var(--muted);
+}
+
+.memorial-search__input {
+  border: none !important;
+  box-shadow: none !important;
+  padding-left: 8px;
+}
+
+.memorial-search__input:focus {
+  outline: none;
+}
+
+.memorial-search__clear {
+  border: none;
+  background: transparent;
+}
+
+.memorial-search__submit {
+  border: none;
+  border-left: 1px solid var(--line);
+  min-width: 140px;
+}
+
+.memorial-search__submit .busy.d-none {
+  display: none;
+}
+
+/* ======================================
+   Memorial Cards
+====================================== */
+.memorial-grid {
+  margin-top: 10px;
+}
+
+.memorial-grid .row {
+  align-items: stretch;
+}
+
+.memorial-grid .row > [class*="col-"] {
+  display: flex;
+}
+
+.memorial-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  background: var(--card);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.memorial-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+  border-color: #d6e6f8;
+}
+
+.memorial-card__media {
+  position: relative;
+  height: 260px;
+  background: #f3f5f8;
+}
+
+.memorial-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.memorial-card__placeholder {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #c3cbd6;
+  font-size: 64px;
+}
+
+.memorial-card__body {
+  padding: 16px 16px 8px;
+  flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.memorial-card__title {
+  margin: 0 0 6px 0;
+  text-align: center;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.memorial-card__dates {
+  text-align: center;
+  color: var(--muted);
+  margin: 0 0 10px 0;
+  font-size: 0.95rem;
+}
+
+.memorial-card__dates .sep {
+  margin: 0 4px;
+}
+
+.memorial-card__bio {
+  color: var(--ink);
+  line-height: 1.5;
+  min-height: 3em;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.memorial-card__footer {
+  background: #fff;
+  border-top: 1px solid var(--line);
+  padding: 12px 12px 14px;
+  flex: 0 0 auto;
+}
+
+/* ======================================
+   Pagination & Actions
+====================================== */
+.memorial-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.memorial-pagination {
+  margin-top: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+
+.memorial-pagination__info small {
+  color: var(--muted);
+}
+
+.pagination {
+  box-shadow: var(--shadow);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.pagination .page-link {
+  border: none;
+  color: var(--ink);
+}
+
+.pagination .page-item.active .page-link {
+  background-color: var(--accent);
+  color: #fff;
+}
+
+.pagination .page-link:hover {
+  background: #f5f7fb;
+}
+
+/* ======================================
+   Focus & Utility Styles
+====================================== */
+mark.bg-warning {
+  background: #fff1a6 !important;
+  color: inherit;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+:focus-visible,
+.memorial-card:focus,
+.memorial-search__input:focus,
+.memorial-search__submit:focus,
+.memorial-search__clear:focus,
+.pagination .page-link:focus {
+  outline: 3px solid rgba(13, 110, 253, 0.35);
+  outline-offset: 2px;
+}
+
+/* ======================================
+   Media Queries
+====================================== */
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1140px;
+  }
+}

@@ -240,7 +240,7 @@ else
     }
 
     var (ok, error) = await Api.UpdateAsync(Id, Entity, NewPhotoFile);
-    if (ok) Nav.NavigateTo("/obituaries");
+    if (ok) Nav.NavigateTo("/");
     else Console.Error.WriteLine(error);
   }
 }
