@@ -6,10 +6,15 @@ var builder = DistributedApplication.CreateBuilder(args);
 var sqlServerDb = builder.AddSqlServer("theserver")
     .WithImage("mssql/server:2022-latest")
     .AddDatabase("sqldata");
+// Add MCP server
+var mcpServer = builder.AddProject<Projects.ServerMCP>("mcpserver")
+    .WithReference(sqlServerDb) // Link the SQL Server database to the MCP server.
+    .WaitFor(sqlServerDb);
 
 // Register backend (API) and frontend (Blazor) projects.
 var api = builder.AddProject<Projects.ObituaryMvcApi>("backend")
     .WithReference(sqlServerDb) // Link the SQL Server database to the API project.
+    .WithReference(mcpServer) // Link the MCP server to the API project.
     .WaitFor(sqlServerDb); 
 // Link the frontend to the backend API.
 builder.AddProject<Projects.ObituaryBlazorWasm>("frontend")

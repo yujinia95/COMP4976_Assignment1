@@ -7,9 +7,30 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.AI;
+using Azure.AI.OpenAI;
+using Azure;
+using Azure.Identity;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
+var endpoint = builder.Configuration["AI:Endpoint"];
+var apiKey = builder.Configuration["AI:ApiKey"];
+var model = builder.Configuration["AI:ModelName"];
+
+builder.Services.AddChatClient(services =>
+  new ChatClientBuilder(
+    (
+      !string.IsNullOrEmpty(apiKey)
+        ? new AzureOpenAIClient(new Uri(endpoint!), new AzureKeyCredential(apiKey))
+        : new AzureOpenAIClient(new Uri(endpoint!), new DefaultAzureCredential())
+    ).GetChatClient(model).AsIChatClient()
+  )
+  .UseFunctionInvocation()
+  .Build());
+
+// Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
 
 // Configure Swagger to include controller-based API endpoints only
@@ -20,6 +41,9 @@ builder.Services.AddSwaggerGen(c =>
         var actionDescriptor = apiDesc.ActionDescriptor;
         return actionDescriptor?.RouteValues != null && actionDescriptor.RouteValues.ContainsKey("controller");
     });
+    
+    // Use full type names to avoid schema ID conflicts
+    c.CustomSchemaIds(type => type.FullName?.Replace("+", "."));
 });
 
 // Configure JSON serializer for consistent camelCase output
@@ -110,11 +134,17 @@ builder.Services.AddCors(o => o.AddPolicy("AllowAllPolicy", builder =>
 
 var app = builder.Build();
 
-
-app.UseExceptionHandler("/Home/Error");
-// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-app.UseHsts();
-
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+else
+{
+    app.UseDeveloperExceptionPage();
+}
 
 app.UseHttpsRedirection();
 
@@ -154,37 +184,49 @@ using (var scope = app.Services.CreateScope())
 
 app.MapIdentityApi<IdentityUser>();
 
-// This block of code makes Swagger available in deployeed environments
+// This block of code makes Swagger available in deployed environments
 // Enable Swagger in non-development via configuration and protect it so only Admins can access
 var enableSwagger = builder.Configuration.GetValue<bool>("EnableSwagger", false);
 if (app.Environment.IsDevelopment() || enableSwagger)
 {
     // Protect the /swagger endpoints so anonymous or non-admin users cannot view them in production
-    app.Use(async (context, next) =>
+    // But allow unrestricted access in development
+    if (!app.Environment.IsDevelopment())
     {
-        if (context.Request.Path.StartsWithSegments("/swagger", StringComparison.OrdinalIgnoreCase))
+        app.Use(async (context, next) =>
         {
-            // If user is not authenticated, this will redirect to login if using cookie auth
-            if (!(context.User?.Identity?.IsAuthenticated ?? false))
+            if (context.Request.Path.StartsWithSegments("/swagger", StringComparison.OrdinalIgnoreCase) ||
+                context.Request.Path.StartsWithSegments("/openapi", StringComparison.OrdinalIgnoreCase))
             {
-                // Redirect to the Identity login page with return url so the user can authenticate
-                var returnUrl = Uri.EscapeDataString(context.Request.Path + context.Request.QueryString);
-                context.Response.Redirect($"/Identity/Account/Login?ReturnUrl={returnUrl}");
-                return;
-            }
+                // If user is not authenticated, this will redirect to login if using cookie auth
+                if (!(context.User?.Identity?.IsAuthenticated ?? false))
+                {
+                    // Redirect to the Identity login page with return url so the user can authenticate
+                    var returnUrl = Uri.EscapeDataString(context.Request.Path + context.Request.QueryString);
+                    context.Response.Redirect($"/Identity/Account/Login?ReturnUrl={returnUrl}");
+                    return;
+                }
 
-            // If authenticated but not in Admin role, forbid
-            if (!context.User.IsInRole("Admin"))
-            {
-                context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                return;
+                // If authenticated but not in Admin role, forbid
+                if (!context.User.IsInRole("Admin"))
+                {
+                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    return;
+                }
             }
-        }
-        await next();
+            await next();
+        });
+    }
+
+    app.UseSwagger(options =>
+    {
+        options.RouteTemplate = "swagger/{documentName}/swagger.json";
     });
-
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "MCP Server v1");
+        options.RoutePrefix = "swagger";
+    });
 }
 
 // Controller-based APIs: map attribute-routed controllers (our ObituariesApiController)

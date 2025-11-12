@@ -21,6 +21,7 @@
 
   <ItemGroup>
   <PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="9.5.2" />
+  <PackageReference Include="Azure.AI.OpenAI" Version="2.1.0" />
   <PackageReference Include="CsvHelper" Version="33.1.0" />
   <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
   <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
@@ -34,7 +35,11 @@
     <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     <PrivateAssets>all</PrivateAssets>
   </PackageReference>
+  <PackageReference Include="Microsoft.Extensions.AI" Version="10.0.0" />
+  <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.0.0-preview.1.25559.3" />
   <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="9.0.0" />
+  <PackageReference Include="ModelContextProtocol" Version="0.3.0-preview.4" />
+  <PackageReference Include="ModelContextProtocol.AspNetCore" Version="0.3.0-preview.4" />
   <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.4" />
   <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.8" />
   <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />

@@ -156,10 +156,10 @@ public class IdentitySeedData
             },
             new Obituary
             {
-                FullName = "Marie Johnson",
+                FullName = "Megan Johnson",
                 DateOfBirth = new DateTime(1960, 7, 30),
                 DateOfDeath = new DateTime(2019, 5, 12),
-                Biography = "Marie was a passionate chef who delighted many with her culinary creations.",
+                Biography = "Megan was a passionate chef who delighted many with her culinary creations.",
                 CreatedByUserId = userId,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow

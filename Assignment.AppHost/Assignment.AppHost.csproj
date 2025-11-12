@@ -24,5 +24,6 @@
       <!-- Reference individual projects so the Aspire SDK can generate the Projects.* types at build time. -->
       <ProjectReference Include="..\ObituaryMvcApi\ObituaryMvcApi.csproj" />
       <ProjectReference Include="..\ObituaryBlazorWasm\ObituaryBlazorWasm.csproj" />
+      <ProjectReference Include="..\ServerMCP\ServerMCP.csproj" />
     </ItemGroup>
 </Project>
