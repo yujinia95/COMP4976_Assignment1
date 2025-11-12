@@ -9,3 +9,20 @@
   word-break: break-word;
   margin: 0;
 }
+
+/* Page-level tweaks to align with other pages' layout */
+.ask-ai-page .page-header h1.h3 {
+  margin-bottom: 0.25rem;
+}
+
+.ask-ai-page .page-header p {
+  margin-bottom: 0.75rem;
+}
+
+.ask-ai-page .btn-group .btn {
+  white-space: nowrap;
+}
+
+.ask-ai-page textarea.form-control {
+  min-height: 6rem;
+}

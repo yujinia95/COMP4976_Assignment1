@@ -2,65 +2,74 @@
 @using System.Net.Http.Json
 @inject HttpClient Http
 
-<h3>Ask AI</h3>
+<PageTitle>Ask AI</PageTitle>
 
-<p>Ask a question about the obituaries. Example: <code>Who liked gardening?</code></p>
-
-<div class="mb-2">
-	<textarea class="form-control" rows="4" @bind="question" placeholder="Type your question here..."></textarea>
-</div>
-
-<div class="mb-2">
-	<button class="btn btn-primary" @onclick="Send" disabled="@(!CanSend)">
-		@if (loading)
-		{
-			<span>Thinking\u001F913</span>
-		}
-		else
-		{
-			<span>Ask</span>
-		}
-	</button>
-	<button class="btn btn-secondary ms-2" @onclick="@(async () => await UseExampleAndSend("Who liked gardening?"))">Use example</button>
-	<button class="btn btn-outline-secondary ms-2" @onclick="Clear">Clear</button>
-</div>
-
-<h5>Examples</h5>
-<div class="mb-3">
-	<div class="btn-group mb-2" role="group">
-		<button class="btn btn-light" @onclick="@(async () => await UseExampleAndSend("List all obituaries"))">List all obituaries</button>
-		<button class="btn btn-light" @onclick="@(async () => await UseExampleAndSend("Show me obituaries with the name Mary"))">Obituaries with the name Mary</button>
-		<button class="btn btn-light" @onclick="@(async () => await UseExampleAndSend("Who died most recently?"))">Who died most recently?</button>
-		<button class="btn btn-light" @onclick="@(async () => await UseExampleAndSend("Who lived the longest?"))">Who lived the longest?</button>
+<div class="container my-4 ask-ai-page">
+	<div class="page-header mb-3">
+		<h1 class="h3">Ask AI</h1>
+		<p class="text-muted">Ask a question about the obituaries. Example: <code>Who liked gardening?</code></p>
 	</div>
-	<div class="btn-group" role="group">
-		<button class="btn btn-light" @onclick="@(async () => await UseExampleAndSend("List people who passed away in 2023"))">Passed away in 2023</button>
-		<button class="btn btn-light" @onclick="@(async () => await UseExampleAndSend("Who was born the earliest?"))">Born the earliest</button>
-		<button class="btn btn-light" @onclick="@(async () => await UseExampleAndSend("Who liked gardening?"))">Who liked gardening?</button>
-	</div>
-</div>
 
-@if (loading)
-{
-	<div class="alert alert-info">Loading response…</div>
-}
-
-@if (!string.IsNullOrEmpty(response))
-{
-	<div class="card mt-3">
+	<div class="card">
 		<div class="card-body">
-			<h5 class="card-title">AI response</h5>
-			<div class="ai-response">
-				<pre class="mb-0">@response</pre>
+			<div class="mb-3">
+				<textarea class="form-control" rows="4" @bind="question" placeholder="Type your question here..."></textarea>
 			</div>
+
+			<div class="mb-2">
+				<button class="btn btn-primary" @onclick="Send" disabled="@(!CanSend)">
+					@if (loading)
+					{
+						<span>Thinking…</span>
+					}
+					else
+					{
+						<span>Ask</span>
+					}
+				</button>
+				<button class="btn btn-secondary ms-2" @onclick="@(async () => await UseExampleAndSend("Who liked gardening?"))">Use example</button>
+				<button class="btn btn-outline-secondary ms-2" @onclick="Clear">Clear</button>
+			</div>
+
+			<h5 class="mt-4">Examples</h5>
+			<div class="mb-3">
+				<div class="btn-group mb-2" role="group">
+					<button class="btn btn-light" @onclick="@(async () => await UseExampleAndSend("List all obituaries"))">List all obituaries</button>
+					<button class="btn btn-light" @onclick="@(async () => await UseExampleAndSend("Show me obituaries with the name Mary"))">Obituaries with the name Mary</button>
+					<button class="btn btn-light" @onclick="@(async () => await UseExampleAndSend("Who died most recently?"))">Who died most recently?</button>
+					<button class="btn btn-light" @onclick="@(async () => await UseExampleAndSend("Who lived the longest?"))">Who lived the longest?</button>
+				</div>
+				<div class="btn-group" role="group">
+					<button class="btn btn-light" @onclick="@(async () => await UseExampleAndSend("List people who passed away in 2023"))">Passed away in 2023</button>
+					<button class="btn btn-light" @onclick="@(async () => await UseExampleAndSend("Who was born the earliest?"))">Born the earliest</button>
+					<button class="btn btn-light" @onclick="@(async () => await UseExampleAndSend("Who liked gardening?"))">Who liked gardening?</button>
+				</div>
+			</div>
+
+			@if (loading)
+			{
+				<div class="alert alert-info">Loading response…</div>
+			}
+
+			@if (!string.IsNullOrEmpty(response))
+			{
+				<div class="card mt-3">
+					<div class="card-body">
+						<h5 class="card-title">AI response</h5>
+						<div class="ai-response">
+							<pre class="mb-0">@response</pre>
+						</div>
+					</div>
+				</div>
+			}
+
+			@if (!string.IsNullOrEmpty(error))
+			{
+				<div class="alert alert-danger mt-3">@error</div>
+			}
 		</div>
 	</div>
-}
-
-@if (!string.IsNullOrEmpty(error))
-{
-	<div class="alert alert-danger mt-3">@error</div>
-}
+</div>
 
 @code {
 	private string question = string.Empty;
