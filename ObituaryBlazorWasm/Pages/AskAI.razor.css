@@ -1,0 +1,11 @@
+.ai-response {
+  max-height: 80vh; /* grow down to ~80% of viewport */
+  overflow: auto;
+  padding: 0.5rem;
+}
+
+.ai-response pre {
+  white-space: pre-wrap; /* wrap long lines */
+  word-break: break-word;
+  margin: 0;
+}
