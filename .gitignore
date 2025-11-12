@@ -482,3 +482,7 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# --- Application configuration (sensitive) ---
+ObituaryMvcApi/appsettings.json
+ObituaryMvcApi/appsettings.Development.json
