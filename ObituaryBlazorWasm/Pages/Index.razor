@@ -79,20 +79,28 @@
         </div>
         <nav>
           <ul class="pagination mb-0">
-            <li class="page-item @(PageIndex == 1 ? "disabled" : null)">
-              <button class="page-link" @onclick="@(()=>GoTo(1))">« First</button>
-            </li>
-            <li class="page-item @(PageIndex == 1 ? "disabled" : null)">
-              <button class="page-link" @onclick="@(()=>GoTo(PageIndex-1))">‹ Prev</button>
-            </li>
-            <li class="page-item active"><span class="page-link">@PageIndex / @TotalPages</span></li>
-            <li class="page-item @(PageIndex == TotalPages ? "disabled" : null)">
-              <button class="page-link" @onclick="@(()=>GoTo(PageIndex+1))">Next ›</button>
-            </li>
-            <li class="page-item @(PageIndex == TotalPages ? "disabled" : null)">
-              <button class="page-link" @onclick="@(()=>GoTo(TotalPages))">Last »</button>
-            </li>
-          </ul>
+              <li class="page-item @(PageIndex == 1 ? "disabled" : null)">
+                <button class="page-link" @onclick="@(()=>GoTo(1))">« First</button>
+              </li>
+              <li class="page-item @(PageIndex == 1 ? "disabled" : null)">
+                <button class="page-link" @onclick="@(()=>GoTo(PageIndex-1))">‹ Prev</button>
+              </li>
+
+              @for (var i = 1; i <= TotalPages; i++)
+              {
+                var page = i;
+                <li class="page-item @(PageIndex == page ? "active" : null)">
+                    <button class="page-link" @onclick="@(()=>GoTo(page))">@(page)</button>
+                </li>
+              }
+
+              <li class="page-item @(PageIndex == TotalPages ? "disabled" : null)">
+                <button class="page-link" @onclick="@(()=>GoTo(PageIndex+1))">Next ›</button>
+              </li>
+              <li class="page-item @(PageIndex == TotalPages ? "disabled" : null)">
+                <button class="page-link" @onclick="@(()=>GoTo(TotalPages))">Last »</button>
+              </li>
+            </ul>
         </nav>
       </div>
     }
@@ -107,7 +115,7 @@
   private string? SearchTerm { get; set; } = string.Empty;
 
   // Paging
-  private const int PageSize = 9;
+  private const int PageSize = 6;
   private int PageIndex = 1;
   private int TotalPages => Math.Max(1, (int)Math.Ceiling(Filtered.Count / (double)PageSize));
   private IEnumerable<Obituary> VisiblePage => Filtered.Skip((PageIndex - 1) * PageSize).Take(PageSize);
