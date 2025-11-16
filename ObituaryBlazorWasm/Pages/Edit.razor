@@ -33,6 +33,10 @@ else
             <!-- keep ids/classes for MVC JS parity -->
             <EditForm id="editForm" EditContext="_ctx" OnValidSubmit="HandleSubmit" class="memorial-form needs-validation">
               <DataAnnotationsValidator />
+              @if (!string.IsNullOrEmpty(_error))
+              {
+                <div class="alert alert-danger">@_error</div>
+              }
               <div class="alert alert-danger d-none" role="alert">Please fix the highlighted errors.</div>
 
               <!-- Name -->
@@ -110,14 +114,18 @@ else
 
               <!-- Actions -->
               <div class="d-flex gap-2">
-                <button id="saveBtn" type="submit" class="btn btn-primary">
-                  <span class="default">Save changes</span>
-                  <span class="busy d-none">
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    Saving…
-                  </span>
+                <button id="saveBtn" type="submit" class="btn btn-primary" disabled="@IsSaving">
+                  @if (IsSaving)
+                  {
+                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                    <span>Saving…</span>
+                  }
+                  else
+                  {
+                    <span>Save changes</span>
+                  }
                 </button>
-                <a class="btn btn-outline-secondary" href="/obituaries">Cancel</a>
+                <a class="btn btn-outline-secondary" href="@($"/obituaries/details/{Id}")">Cancel</a>
               </div>
             </EditForm>
 
@@ -153,7 +161,9 @@ else
   private bool RemoveExistingPhoto;
   private InputFile? _fileInput;
   private string _photoInfo = "";
-
+  private bool IsSaving = false;
+  private string? _error;
+  
   protected override async Task OnInitializedAsync()
   {
     Entity = await Api.GetAsync(Id);
@@ -231,16 +241,39 @@ else
     ValidateDates();
     if (!_ctx.Validate()) return;
 
-    // Convention for “remove existing photo” when no new file is uploaded:
-    // Set Photo to empty byte[] so server can treat it as “remove”.
-    // (If your server expects null instead, change to: Entity.Photo = null)
-    if (RemoveExistingPhoto && NewPhotoFile is null)
+    IsSaving = true;
+    _error = null;
+    try
     {
-      Entity.Photo = Array.Empty<byte>();
-    }
+      // Convention for “remove existing photo” when no new file is uploaded:
+      // Set Photo to empty byte[] so server can treat it as “remove”.
+      // (If your server expects null instead, change to: Entity.Photo = null)
+      if (RemoveExistingPhoto && NewPhotoFile is null)
+      {
+        Entity.Photo = Array.Empty<byte>();
+      }
 
-    var (ok, error) = await Api.UpdateAsync(Id, Entity, NewPhotoFile);
-    if (ok) Nav.NavigateTo("/");
-    else Console.Error.WriteLine(error);
+      var (ok, error) = await Api.UpdateAsync(Id, Entity, NewPhotoFile);
+      if (ok)
+      {
+        // Go to the updated obituary details page
+        Nav.NavigateTo($"/obituaries/details/{Id}", forceLoad: false);
+        return;
+      }
+      else
+      {
+        _error = string.IsNullOrWhiteSpace(error) ? "Failed to save changes." : error;
+        Console.Error.WriteLine(error);
+      }
+    }
+    catch (Exception ex)
+    {
+      _error = ex.Message;
+      Console.Error.WriteLine(ex);
+    }
+    finally
+    {
+     IsSaving = false;
+    }
   }
 }
